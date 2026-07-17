@@ -1,21 +1,11 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Bounds, OrbitControls, useBounds } from '@react-three/drei'
+import { Bounds, OrbitControls } from '@react-three/drei'
+import * as THREE from 'three'
 import { AnatomyModel } from './components/AnatomyModel'
 import { Loader } from './components/Loader'
 import { Panel } from './components/Panel'
 import { recommend, resolveMuscle } from './lib/recommend'
-
-type BoundsApi = ReturnType<typeof useBounds>
-
-/** 把 Bounds 的 api 交給外層 ref,供「回原始位置」按鈕呼叫。 */
-function BoundsApiBridge({ apiRef }: { apiRef: React.RefObject<BoundsApi | null> }) {
-  const bounds = useBounds()
-  useEffect(() => {
-    apiRef.current = bounds
-  }, [bounds, apiRef])
-  return null
-}
 
 function App() {
   const [selectedName, setSelectedName] = useState<string | null>(null)
@@ -23,17 +13,23 @@ function App() {
   const [opacity, setOpacity] = useState(1) // 肌肉透明度(1 = 不透明)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null)
-  const boundsRef = useRef<BoundsApi | null>(null)
+  const groupRef = useRef<THREE.Group>(null)
 
-  // 回原始位置:相機轉回正面,再重新框好距離
+  // 回正面視角:依模型實際包圍盒中心對準,正面水平框好(不會從腳往上看)
   const resetView = () => {
+    const group = groupRef.current
     const controls = controlsRef.current
-    if (controls) {
-      controls.object.position.set(0, 0, 800)
-      controls.target.set(0, 0, 0)
-      controls.update()
-    }
-    boundsRef.current?.refresh().clip().fit()
+    if (!group || !controls) return
+    const box = new THREE.Box3().setFromObject(group)
+    const center = box.getCenter(new THREE.Vector3())
+    const size = box.getSize(new THREE.Vector3())
+    const cam = controls.object as THREE.PerspectiveCamera
+    const fov = (cam.fov * Math.PI) / 180
+    // 依身高/身寬算出剛好框滿的距離,再留一點邊界
+    const dist = (Math.max(size.y, size.x) / 2 / Math.tan(fov / 2)) * 1.3
+    cam.position.set(center.x, center.y, center.z + dist)
+    controls.target.copy(center)
+    controls.update()
   }
 
   // 解析選中的 mesh -> 肌群 -> 動作清單
@@ -74,9 +70,8 @@ function App() {
             <Suspense fallback={<Loader />}>
               {/* Bounds fit clip 只在載入時框一次視角(不加 observe,避免點選時重置縮放) */}
               <Bounds fit clip margin={1.2}>
-                <BoundsApiBridge apiRef={boundsRef} />
                 {/* GLB 原始為 Z-up,轉成 Y-up 讓人體站直、正面朝鏡頭 */}
-                <group rotation={[-Math.PI / 2, 0, 0]}>
+                <group ref={groupRef} rotation={[-Math.PI / 2, 0, 0]}>
                   <AnatomyModel
                     selectedName={selectedName}
                     opacity={opacity}
