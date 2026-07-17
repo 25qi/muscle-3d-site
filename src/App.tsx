@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { AnatomyModel } from './components/AnatomyModel'
 import { Loader } from './components/Loader'
 import { Panel } from './components/Panel'
-import { recommend, resolveMuscle } from './lib/recommend'
+import { resolveMuscle } from './lib/recommend'
 
 function App() {
   const [selectedName, setSelectedName] = useState<string | null>(null)
@@ -32,12 +32,11 @@ function App() {
     controls.update()
   }
 
-  // 解析選中的 mesh -> 肌群 -> 動作清單
+  // 解析選中的 mesh -> 肌群(動作清單由 Panel 依所選資料庫 provider 計算)
   const muscle = useMemo(
     () => (selectedName ? resolveMuscle(selectedName) : null),
     [selectedName],
   )
-  const exercises = useMemo(() => (muscle ? recommend(muscle) : []), [muscle])
 
   // 點到未支援的肌肉時跳提示;選到有支援的、或沒選時,立即清掉提示
   useEffect(() => {
@@ -128,7 +127,7 @@ function App() {
 
         {/* 右側動作面板 */}
         <aside className="h-1/2 w-full overflow-hidden border-t border-neutral-800 bg-neutral-950 text-neutral-200 md:h-full md:w-96 md:border-t-0 md:border-l">
-          <Panel meshName={selectedName} muscle={muscle} exercises={exercises} />
+          <Panel meshName={selectedName} muscle={muscle} />
         </aside>
       </div>
 
