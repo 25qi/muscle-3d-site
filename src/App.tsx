@@ -1,15 +1,40 @@
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Bounds, OrbitControls } from '@react-three/drei'
+import { Bounds, OrbitControls, useBounds } from '@react-three/drei'
 import { AnatomyModel } from './components/AnatomyModel'
 import { Loader } from './components/Loader'
 import { Panel } from './components/Panel'
 import { recommend, resolveMuscle } from './lib/recommend'
 
+type BoundsApi = ReturnType<typeof useBounds>
+
+/** 把 Bounds 的 api 交給外層 ref,供「回原始位置」按鈕呼叫。 */
+function BoundsApiBridge({ apiRef }: { apiRef: React.RefObject<BoundsApi | null> }) {
+  const bounds = useBounds()
+  useEffect(() => {
+    apiRef.current = bounds
+  }, [bounds, apiRef])
+  return null
+}
+
 function App() {
   const [selectedName, setSelectedName] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [opacity, setOpacity] = useState(1) // 肌肉透明度(1 = 不透明)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const controlsRef = useRef<any>(null)
+  const boundsRef = useRef<BoundsApi | null>(null)
+
+  // 回原始位置:相機轉回正面,再重新框好距離
+  const resetView = () => {
+    const controls = controlsRef.current
+    if (controls) {
+      controls.object.position.set(0, 0, 800)
+      controls.target.set(0, 0, 0)
+      controls.update()
+    }
+    boundsRef.current?.refresh().clip().fit()
+  }
 
   // 解析選中的 mesh -> 肌群 -> 動作清單
   const muscle = useMemo(
@@ -49,6 +74,7 @@ function App() {
             <Suspense fallback={<Loader />}>
               {/* Bounds fit clip 只在載入時框一次視角(不加 observe,避免點選時重置縮放) */}
               <Bounds fit clip margin={1.2}>
+                <BoundsApiBridge apiRef={boundsRef} />
                 {/* GLB 原始為 Z-up,轉成 Y-up 讓人體站直、正面朝鏡頭 */}
                 <group rotation={[-Math.PI / 2, 0, 0]}>
                   <AnatomyModel
@@ -63,6 +89,7 @@ function App() {
             {/* 允許上下旋轉,但限制 polar 範圍避免翻到正上方/正下方(人體全程保持正立) */}
             {/* zoomToCursor: 滾輪縮放朝游標位置,而非畫面中心 */}
             <OrbitControls
+              ref={controlsRef}
               enablePan={false}
               makeDefault
               zoomToCursor
@@ -87,6 +114,15 @@ function App() {
               {Math.round(opacity * 100)}%
             </span>
           </div>
+
+          {/* 回原始位置 */}
+          <button
+            type="button"
+            onClick={resetView}
+            className="absolute top-4 right-4 rounded-lg bg-neutral-800/80 px-3 py-2 text-xs text-neutral-200 backdrop-blur hover:bg-neutral-700/80"
+          >
+            回正面視角
+          </button>
 
           {toast && (
             <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-neutral-800/90 px-4 py-2 text-sm text-amber-300 shadow-lg">
