@@ -428,7 +428,6 @@ function App() {
           <Panel
             meshName={selectedName}
             muscle={muscle}
-            onOpenList={() => setShowList(true)}
             showFavorites={showFavorites}
             onCloseFavorites={() => setShowFavorites(false)}
             favorites={favorites}

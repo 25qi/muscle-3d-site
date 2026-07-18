@@ -4,6 +4,7 @@
  */
 import edbData from '../../data/exercisedb.json'
 import { muscleTermZh } from '../../data/muscleTermZh'
+import { exerciseNameZh } from '../../data/exerciseNameZh'
 import type { ExerciseProvider, NormalizedExercise } from './types'
 
 interface RawEdb {
@@ -56,6 +57,7 @@ function normalize(ex: RawEdb, isPrimary: boolean): NormalizedExercise {
   return {
     id: ex.id,
     name: ex.name,
+    nameZh: exerciseNameZh(ex.name),
     isPrimary,
     targetMuscle: muscleTermZh(ex.target),
     secondaryMuscles: secondaryZh(ex.target, ex.secondary),

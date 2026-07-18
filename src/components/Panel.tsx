@@ -8,8 +8,6 @@ interface PanelProps {
   meshName: string | null
   /** 解析到的肌群(null = 尚未支援) */
   muscle: MuscleDef | null
-  /** 開啟左側肌肉清單(空狀態引導卡的主要行動) */
-  onOpenList: () => void
   /** 是否顯示「我的最愛」模式 */
   showFavorites: boolean
   /** 關閉「我的最愛」模式 */
@@ -82,9 +80,12 @@ function ExerciseCard({
             />
           )}
           <div className="min-w-0 flex-1">
-            <div className="font-medium text-ink capitalize">{ex.name}</div>
+            <div className="font-medium text-ink">{ex.nameZh}</div>
+            <div className="truncate text-xs text-ink-3 capitalize">
+              {ex.name}
+            </div>
             {/* 這個動作訓練到哪些肌肉 */}
-            <div className="mt-0.5 truncate text-xs">
+            <div className="mt-1 truncate text-xs">
               <span className="text-ink-2">{ex.targetMuscle}</span>
               {ex.secondaryMuscles.length > 0 && (
                 <span className="text-ink-3">
@@ -156,7 +157,6 @@ function ExerciseCard({
 export function Panel({
   meshName,
   muscle,
-  onOpenList,
   showFavorites,
   onCloseFavorites,
   favorites,
@@ -289,16 +289,9 @@ export function Panel({
             選一塊肌肉,立刻看到最適合訓練它的動作、器材與分解步驟。
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onOpenList}
-          className="hint-pulse flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-ground transition-transform hover:scale-[1.03]"
-        >
-          ☰ 開啟肌肉清單
-        </button>
         <p className="flex items-center gap-1.5 text-xs text-ink-3">
           <span className="text-base">←</span>
-          或直接旋轉、點選左側的 3D 模型
+          旋轉、點選左側的 3D 模型,或用左上的「肌肉清單」搜尋
         </p>
       </div>
     )

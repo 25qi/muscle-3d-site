@@ -10,7 +10,10 @@
 
 export interface NormalizedExercise {
   id: string
+  /** 英文原名 */
   name: string
+  /** 中文名(台灣健身用語,規則式翻譯) */
+  nameZh: string
   /** true = 該肌群是主要目標;false = 輔助 */
   isPrimary: boolean
   /** 這個動作主要訓練的肌肉(中文) */
