@@ -63,7 +63,11 @@ function normalize(ex: RawEdb, isPrimary: boolean): NormalizedExercise {
     secondaryMuscles: secondaryZh(ex.target, ex.secondary),
     equipment: ex.equipment,
     level: null,
-    imageUrl: ex.gif ? GIF_BASE + ex.gif : null,
+    // 靜態縮圖(images/xxx.jpg)由 GIF 路徑(videos/xxx.gif)推導,不需另存欄位
+    imageUrl: ex.gif
+      ? GIF_BASE + ex.gif.replace('videos/', 'images/').replace('.gif', '.jpg')
+      : null,
+    gifUrl: ex.gif ? GIF_BASE + ex.gif : null,
     steps: ex.steps,
     stepsZh: ex.stepsZh ?? [],
   }

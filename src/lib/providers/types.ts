@@ -23,8 +23,10 @@ export interface NormalizedExercise {
   equipment: string | null
   /** 難度(有些資料庫沒有 → null) */
   level: string | null
-  /** 縮圖/動圖完整網址(沒有 → null) */
+  /** 靜態縮圖完整網址(清單用,較輕;沒有 → null) */
   imageUrl: string | null
+  /** 動圖 GIF 完整網址(全螢幕燈箱用;沒有 → null) */
+  gifUrl: string | null
   /** 動作步驟(英文) */
   steps: string[]
   /** 動作步驟(中文,對應 steps 同索引;沒有 → 空陣列) */

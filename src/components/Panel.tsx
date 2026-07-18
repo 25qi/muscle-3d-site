@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { MuscleDef } from '../data/muscleMap'
 import { muscleNameZh } from '../data/muscleNameZh'
 import { PROVIDERS, type NormalizedExercise } from '../lib/providers'
+import { ExerciseModal } from './ExerciseModal'
 
 interface PanelProps {
   /** 被點到的 mesh 原始解剖名稱(null = 還沒點) */
@@ -44,31 +45,24 @@ const equipZh = (e: string) => EQUIP_ZH[e] ?? e
 
 const provider = PROVIDERS[0]
 
-/** 單張動作卡(肌肉模式與最愛模式共用)。 */
+/** 單張動作卡(肌肉模式與最愛模式共用)。點縮圖或標題 → 開全螢幕燈箱。 */
 function ExerciseCard({
   ex,
-  open,
-  onToggleExpand,
   favorited,
   onToggleFav,
+  onOpen,
 }: {
   ex: NormalizedExercise
-  open: boolean
-  onToggleExpand: () => void
   favorited: boolean
   onToggleFav: () => void
+  onOpen: () => void
 }) {
   return (
-    <li
-      className={
-        'overflow-hidden rounded-xl border bg-surface-2 transition-colors ' +
-        (open ? 'border-accent/40' : 'border-line hover:border-ink-3/40')
-      }
-    >
+    <li className="overflow-hidden rounded-xl border border-line bg-surface-2 transition-colors hover:border-ink-3/40">
       <div className="flex items-center gap-2 p-2.5">
         <button
           type="button"
-          onClick={onToggleExpand}
+          onClick={onOpen}
           className="flex min-w-0 flex-1 items-center gap-3 text-left"
         >
           {ex.imageUrl && (
@@ -84,7 +78,6 @@ function ExerciseCard({
             <div className="truncate text-xs text-ink-3 capitalize">
               {ex.name}
             </div>
-            {/* 這個動作訓練到哪些肌肉 */}
             <div className="mt-1 truncate text-xs">
               <span className="text-ink-2">{ex.targetMuscle}</span>
               {ex.secondaryMuscles.length > 0 && (
@@ -124,32 +117,7 @@ function ExerciseCard({
         >
           {favorited ? '★' : '☆'}
         </button>
-
-        <button
-          type="button"
-          onClick={onToggleExpand}
-          aria-label={open ? '收合' : '展開'}
-          className={
-            'flex-none px-1 text-lg leading-none text-ink-3 transition-transform ' +
-            (open ? 'rotate-180' : '')
-          }
-        >
-          ▾
-        </button>
       </div>
-
-      {open && ex.steps.length > 0 && (
-        <ol className="list-decimal space-y-3 border-t border-line px-5 py-4 pl-8 text-sm marker:text-ink-3">
-          {ex.steps.map((step, i) => (
-            <li key={i}>
-              <span className="text-ink-2">{step}</span>
-              {ex.stepsZh[i] && (
-                <span className="mt-1 block text-ink">{ex.stepsZh[i]}</span>
-              )}
-            </li>
-          ))}
-        </ol>
-      )}
     </li>
   )
 }
@@ -162,16 +130,16 @@ export function Panel({
   favorites,
   toggleFav,
 }: PanelProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [openEx, setOpenEx] = useState<NormalizedExercise | null>(null)
   const [primaryOnly, setPrimaryOnly] = useState(false)
   const [favOnly, setFavOnly] = useState(false)
   const [equip, setEquip] = useState<string | null>(null)
 
   const isFav = (id: string) => favorites.has(id)
 
-  // 切換肌肉/模式時重置展開與篩選
+  // 切換肌肉/模式時重置篩選與燈箱
   useEffect(() => {
-    setExpandedId(null)
+    setOpenEx(null)
     setPrimaryOnly(false)
     setFavOnly(false)
     setEquip(null)
@@ -202,6 +170,16 @@ export function Panel({
     [all, primaryOnly, equip, favOnly, favorites],
   )
 
+  // 全螢幕燈箱(各模式共用)
+  const modal = openEx ? (
+    <ExerciseModal
+      ex={openEx}
+      favorited={isFav(openEx.id)}
+      onToggleFav={() => toggleFav(openEx.id)}
+      onClose={() => setOpenEx(null)}
+    />
+  ) : null
+
   // ── 我的最愛模式 ──
   if (showFavorites) {
     const items = [...favorites]
@@ -220,6 +198,7 @@ export function Panel({
 
     return (
       <div className="flex h-full flex-col">
+        {modal}
         <div className="flex items-center justify-between border-b border-line p-5">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight text-ink">
@@ -259,12 +238,9 @@ export function Panel({
                     <ExerciseCard
                       key={ex.id}
                       ex={ex}
-                      open={expandedId === ex.id}
-                      onToggleExpand={() =>
-                        setExpandedId(expandedId === ex.id ? null : ex.id)
-                      }
                       favorited={isFav(ex.id)}
                       onToggleFav={() => toggleFav(ex.id)}
+                      onOpen={() => setOpenEx(ex)}
                     />
                   ))}
                 </ul>
@@ -312,6 +288,7 @@ export function Panel({
 
   return (
     <div className="flex h-full flex-col">
+      {modal}
       <div className="border-b border-line p-5">
         <h2 className="text-2xl font-semibold tracking-tight text-ink">
           {nameZh}
@@ -388,12 +365,9 @@ export function Panel({
               <ExerciseCard
                 key={ex.id}
                 ex={ex}
-                open={expandedId === ex.id}
-                onToggleExpand={() =>
-                  setExpandedId(expandedId === ex.id ? null : ex.id)
-                }
                 favorited={isFav(ex.id)}
                 onToggleFav={() => toggleFav(ex.id)}
+                onOpen={() => setOpenEx(ex)}
               />
             ))}
           </ul>

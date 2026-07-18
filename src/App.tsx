@@ -122,16 +122,10 @@ function App() {
   const groupRef = useRef<THREE.Group>(null)
   const centroidRef = useRef<THREE.Vector3 | null>(null) // 幾何重心(只算一次)
 
-  /**
-   * 計算「面向某肌肉並置中」的鏡頭目標。
-   * force=false 時只有當相機目前在肌肉「背面」才回傳(避免點正面看得到的肌肉時鏡頭亂跳);
-   * 回傳 null = 不需要移動鏡頭。
-   */
-  const computeFocus = (name: string, force: boolean): FocusGoal | null => {
+  // 取某肌肉(含左右)的世界包圍盒 + 水平外向方向(前面→前、背面→後、側面→側)
+  const muscleBoxDir = (name: string) => {
     const group = groupRef.current
-    const controls = controlsRef.current
-    if (!group || !controls) return null
-
+    if (!group) return null
     const key = symmetryKey(name)
     const box = new THREE.Box3()
     let found = false
@@ -143,43 +137,50 @@ function App() {
       }
     })
     if (!found || box.isEmpty()) return null
-
-    const mCenter = box.getCenter(new THREE.Vector3())
-    const radius = box.getSize(new THREE.Vector3()).length() / 2
-    const bodyCenter = getCentroid(group)
-    // 面向該肌肉的水平外向方向(前面肌肉→前方、背面→後方、側面→側向)
-    const dir = new THREE.Vector3(
-      mCenter.x - bodyCenter.x,
-      0,
-      mCenter.z - bodyCenter.z,
-    )
-    if (dir.lengthSq() < 1e-4) dir.set(0, 0, 1)
+    const center = box.getCenter(new THREE.Vector3())
+    const dir = new THREE.Vector3()
+      .subVectors(center, getCentroid(group))
+      .setY(0)
+    const sideways = dir.lengthSq() < 1e-4
+    if (sideways) dir.set(0, 0, 1)
     dir.normalize()
+    return { box, center, dir, sideways }
+  }
 
-    const cam = controls.object as THREE.PerspectiveCamera
-    // 相機目前是否已在肌肉正面那側?(相機→肌肉外向的 dot > 0 表示看得到正面)
+  // 該肌肉目前是否朝向鏡頭(相機在它的外向側)?中線肌肉一律算 true
+  const isFacingCamera = (name: string): boolean => {
+    const controls = controlsRef.current
+    const info = muscleBoxDir(name)
+    if (!controls || !info) return true
+    if (info.sideways) return true
     const camSide = new THREE.Vector3()
-      .subVectors(cam.position, mCenter)
+      .subVectors(controls.object.position, info.center)
       .normalize()
-    if (!force && camSide.dot(dir) > 0.35) return null // 已面向該肌肉 → 不動鏡頭
+    return camSide.dot(info.dir) > -0.1 // 明顯背對鏡頭才排除
+  }
 
+  // 平滑轉到「面向該肌肉並置中」的鏡頭目標(清單選取用)
+  const focusGoalFor = (name: string): FocusGoal | null => {
+    const controls = controlsRef.current
+    const info = muscleBoxDir(name)
+    if (!controls || !info) return null
+    const radius = info.box.getSize(new THREE.Vector3()).length() / 2
+    const cam = controls.object as THREE.PerspectiveCamera
     const fov = (cam.fov * Math.PI) / 180
     let dist = (radius / Math.tan(fov / 2)) * 2.4
     dist = Math.min(dist, controls.maxDistance ?? dist)
     dist = Math.max(dist, 120)
     return {
-      pos: mCenter.clone().addScaledVector(dir, dist),
-      target: mCenter.clone(),
+      pos: info.center.clone().addScaledVector(info.dir, dist),
+      target: info.center.clone(),
     }
   }
 
-  // 挑選清單(3D 重疊)選肌肉:若點到的是背對鏡頭的肌肉,就轉過去置中
+  // 挑選清單(3D 重疊)選肌肉:只換高亮/面板,不動鏡頭
   const selectMuscle = (name: string) => {
     setSelectedName(name)
     setPickList(null)
     setShowFavorites(false)
-    const goal = computeFocus(name, false)
-    if (goal) setFocusGoal(goal)
   }
 
   // 從清單選肌肉:一律平滑轉到面向該肌肉並置中
@@ -188,17 +189,18 @@ function App() {
     setPickList(null)
     setShowFavorites(false)
     setShowList(false) // 從清單選完就關閉清單,露出置中的肌肉
-    const goal = computeFocus(name, true)
+    const goal = focusGoalFor(name)
     if (goal) setFocusGoal(goal)
   }
 
-  // 點擊 3D:先幫他選最前面那塊;多塊重疊再跳清單。若選到的是背面肌肉,轉過去。
+  // 點擊 3D:排除「背對目前視角」的肌肉(正面時不列背面),不轉鏡頭;
+  // 選最前面那塊,若剩多塊重疊再跳清單。
   const handlePick = (names: string[], x: number, y: number) => {
-    setSelectedName(names[0])
-    setPickList(names.length > 1 ? { names, x, y } : null)
+    const facing = names.filter(isFacingCamera)
+    const list = facing.length > 0 ? facing : names
+    setSelectedName(list[0])
+    setPickList(list.length > 1 ? { names: list, x, y } : null)
     setShowFavorites(false)
-    const goal = computeFocus(names[0], false)
-    if (goal) setFocusGoal(goal)
   }
 
   // 幾何重心(頂點平均)—— 比包圍盒中心更接近視覺質量中心;只算一次並快取
@@ -472,7 +474,8 @@ function App() {
       <footer className="border-t border-line bg-surface px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3">
         Anatomy model: BodyParts3D © The Database Center for Life Science (CC
         BY-SA 2.1 JP) / Z-Anatomy (CC BY-SA 4.0). Exercise data: ExerciseDB
-        (hasaneyldrm/exercises-dataset, MIT).
+        (hasaneyldrm/exercises-dataset, MIT). Exercise images/GIFs © GymVisual
+        (gymvisual.com).
       </footer>
     </div>
   )
