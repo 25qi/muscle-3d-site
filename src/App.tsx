@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Bounds, OrbitControls } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { AnatomyModel } from './components/AnatomyModel'
 import { Loader } from './components/Loader'
@@ -88,17 +88,15 @@ function App() {
             <directionalLight position={[-700, 100, 300]} intensity={0.35} />
 
             <Suspense fallback={<Loader />}>
-              {/* Bounds fit clip 只在載入時框一次視角(不加 observe,避免點選時重置縮放) */}
-              <Bounds fit clip margin={1.2}>
-                {/* GLB 原始為 Z-up,轉成 Y-up 讓人體站直、正面朝鏡頭 */}
-                <group ref={groupRef} rotation={[-Math.PI / 2, 0, 0]}>
-                  <AnatomyModel
-                    selectedName={selectedName}
-                    opacity={opacity}
-                    onPick={handlePick}
-                  />
-                </group>
-              </Bounds>
+              {/* GLB 原始為 Z-up,轉成 Y-up 讓人體站直、正面朝鏡頭 */}
+              <group ref={groupRef} rotation={[-Math.PI / 2, 0, 0]}>
+                <AnatomyModel
+                  selectedName={selectedName}
+                  opacity={opacity}
+                  onPick={handlePick}
+                  onReady={resetView}
+                />
+              </group>
             </Suspense>
 
             {/* 允許上下旋轉,但限制 polar 範圍避免翻到正上方/正下方(人體全程保持正立) */}

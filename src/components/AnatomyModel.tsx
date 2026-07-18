@@ -20,6 +20,8 @@ interface AnatomyModelProps {
    * 只有一塊時 App 直接選;多塊時 App 跳清單讓使用者挑。
    */
   onPick: (meshNames: string[], clientX: number, clientY: number) => void
+  /** 模型載入並掛載完成後呼叫一次(用來設定初始正面視角) */
+  onReady: () => void
 }
 
 /** 從被 raycast 命中的物件取得它的解剖名稱(名字在 mesh 或其父節點上)。 */
@@ -50,9 +52,17 @@ export function AnatomyModel({
   selectedName,
   opacity,
   onPick,
+  onReady,
 }: AnatomyModelProps) {
   const { scene } = useGLTF(MODEL_URL)
   const downPos = useRef<{ x: number; y: number } | null>(null)
+
+  // 模型掛載完成後通知一次(此時包圍盒可算,設定初始正面視角)
+  useEffect(() => {
+    onReady()
+    // 僅在掛載時執行一次
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // clone 每塊 mesh 的材質(高亮/透明互不干擾);雙面渲染避免薄片肌肉看穿破洞
   useMemo(() => {

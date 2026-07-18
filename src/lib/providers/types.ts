@@ -18,8 +18,10 @@ export interface NormalizedExercise {
   level: string | null
   /** 縮圖/動圖完整網址(沒有 → null) */
   imageUrl: string | null
-  /** 動作步驟 */
+  /** 動作步驟(英文) */
   steps: string[]
+  /** 動作步驟(中文,對應 steps 同索引;沒有 → 空陣列) */
+  stepsZh: string[]
 }
 
 export interface ExerciseProvider {

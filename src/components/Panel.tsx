@@ -201,9 +201,16 @@ export function Panel({ meshName, muscle }: PanelProps) {
                 </button>
 
                 {open && ex.steps.length > 0 && (
-                  <ol className="list-decimal space-y-1.5 border-t border-neutral-800 px-4 py-3 pl-8 text-sm text-neutral-300">
+                  <ol className="list-decimal space-y-2.5 border-t border-neutral-800 px-4 py-3 pl-8 text-sm">
                     {ex.steps.map((step, i) => (
-                      <li key={i}>{step}</li>
+                      <li key={i}>
+                        <span className="text-neutral-300">{step}</span>
+                        {ex.stepsZh[i] && (
+                          <span className="mt-0.5 block text-neutral-400">
+                            {ex.stepsZh[i]}
+                          </span>
+                        )}
+                      </li>
                     ))}
                   </ol>
                 )}

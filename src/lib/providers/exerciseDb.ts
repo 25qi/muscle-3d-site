@@ -14,6 +14,7 @@ interface RawEdb {
   bodyPart: string
   gif: string
   steps: string[]
+  stepsZh: string[]
 }
 
 const exercises = edbData as unknown as RawEdb[]
@@ -67,6 +68,7 @@ export const exerciseDbProvider: ExerciseProvider = {
         level: null,
         imageUrl: ex.gif ? GIF_BASE + ex.gif : null,
         steps: ex.steps,
+        stepsZh: ex.stepsZh ?? [],
       }),
     )
   },
