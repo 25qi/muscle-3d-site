@@ -18,7 +18,7 @@ interface PickList {
 function App() {
   const [selectedName, setSelectedName] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
-  const [opacity, setOpacity] = useState(1) // 肌肉透明度(1 = 不透明)
+  const [opacity, setOpacity] = useState(0.7) // 肌肉透明度預設 70%(可透視深層)
   const [showList, setShowList] = useState(false) // 是否顯示可搜尋肌肉清單
   const [pickList, setPickList] = useState<PickList | null>(null) // 游標下多塊重疊時的挑選清單
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,11 +70,14 @@ function App() {
     return () => clearTimeout(t)
   }, [selectedName, muscle])
 
+  const pill =
+    'rounded-xl border border-line bg-surface/70 backdrop-blur-md transition-colors'
+
   return (
-    <div className="flex h-full w-full flex-col">
+    <div className="flex h-full w-full flex-col bg-ground">
       {/* 主區:3D 場景 + 動作面板 */}
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-        <div className="relative h-1/2 w-full bg-neutral-900 md:h-full md:flex-1">
+        <div className="relative h-1/2 w-full bg-ground md:h-full md:flex-1">
           {/* logarithmicDepthBuffer + 收緊 near/far:大幅降低薄片肌肉重疊處的 z-fighting(破洞/斑駁) */}
           <Canvas
             camera={{ position: [0, 0, 800], fov: 45, near: 20, far: 3500 }}
@@ -117,11 +120,13 @@ function App() {
               <button
                 type="button"
                 onClick={() => setShowList(true)}
-                className="rounded-lg bg-neutral-800/80 px-3 py-2 text-xs text-neutral-200 backdrop-blur hover:bg-neutral-700/80"
+                className={`${pill} flex items-center gap-1.5 px-3 py-2 text-xs text-ink-2 hover:text-ink`}
               >
-                ☰ 肌肉清單
+                <span className="text-accent">☰</span> 肌肉清單
               </button>
-              <div className="flex items-center gap-2 rounded-lg bg-neutral-800/80 px-3 py-2 text-xs text-neutral-300 backdrop-blur">
+              <div
+                className={`${pill} flex items-center gap-2.5 px-3 py-2 text-xs text-ink-2`}
+              >
                 <span className="whitespace-nowrap">透明度</span>
                 <input
                   type="range"
@@ -130,9 +135,9 @@ function App() {
                   step={0.05}
                   value={opacity}
                   onChange={(e) => setOpacity(Number(e.target.value))}
-                  className="w-24 accent-blue-400"
+                  className="w-24 accent-accent"
                 />
-                <span className="w-8 tabular-nums text-neutral-400">
+                <span className="w-8 text-right tabular-nums text-ink">
                   {Math.round(opacity * 100)}%
                 </span>
               </div>
@@ -143,10 +148,16 @@ function App() {
           <button
             type="button"
             onClick={resetView}
-            className="absolute top-4 right-4 rounded-lg bg-neutral-800/80 px-3 py-2 text-xs text-neutral-200 backdrop-blur hover:bg-neutral-700/80"
+            className={`${pill} absolute top-4 right-4 px-3 py-2 text-xs text-ink-2 hover:text-ink`}
           >
-            回正面視角
+            ⟲ 回正面視角
           </button>
+
+          {/* 品牌浮水印 */}
+          <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-2 text-xs text-ink-3">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+            肌肉圖鑑 · 3D Muscle Explorer
+          </div>
 
           {/* ④ 可搜尋肌肉清單(左側浮層) */}
           {showList && (
@@ -167,10 +178,10 @@ function App() {
                 onClick={() => setPickList(null)}
               />
               <div
-                className="fixed z-40 max-h-64 w-52 overflow-y-auto rounded-lg border border-neutral-700 bg-neutral-900/95 py-1 text-sm shadow-xl backdrop-blur"
+                className="fixed z-40 max-h-64 w-56 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1.5 text-sm shadow-2xl backdrop-blur-md"
                 style={{ left: pickList.x + 4, top: pickList.y + 4 }}
               >
-                <div className="px-3 py-1 text-[11px] text-neutral-500">
+                <div className="px-3 py-1 text-[11px] text-ink-3">
                   這裡有 {pickList.names.length} 塊重疊肌肉
                 </div>
                 {pickList.names.map((name) => (
@@ -178,7 +189,7 @@ function App() {
                     key={name}
                     type="button"
                     onClick={() => selectMuscle(name)}
-                    className="block w-full px-3 py-1.5 text-left text-neutral-200 hover:bg-neutral-800"
+                    className="block w-full px-3 py-1.5 text-left text-ink-2 transition-colors hover:bg-accent/10 hover:text-ink"
                   >
                     {muscleNameZh(name) ?? name}
                   </button>
@@ -188,20 +199,20 @@ function App() {
           )}
 
           {toast && (
-            <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-neutral-800/90 px-4 py-2 text-sm text-amber-300 shadow-lg">
+            <div className="pointer-events-none absolute bottom-16 left-1/2 -translate-x-1/2 rounded-full border border-warn/30 bg-surface-2/90 px-4 py-2 text-sm text-warn shadow-lg backdrop-blur-md">
               {toast}
             </div>
           )}
         </div>
 
         {/* 右側動作面板 */}
-        <aside className="h-1/2 w-full overflow-hidden border-t border-neutral-800 bg-neutral-950 text-neutral-200 md:h-full md:w-96 md:border-t-0 md:border-l">
+        <aside className="h-1/2 w-full overflow-hidden border-t border-line bg-surface text-ink md:h-full md:w-[24rem] md:border-t-0 md:border-l">
           <Panel meshName={selectedName} muscle={muscle} />
         </aside>
       </div>
 
       {/* Footer 授權標註(CC BY-SA 法律義務,不可省) */}
-      <footer className="border-t border-neutral-800 bg-neutral-950 px-4 py-2 text-center text-[11px] leading-relaxed text-neutral-500">
+      <footer className="border-t border-line bg-surface px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3">
         Anatomy model: BodyParts3D © The Database Center for Life Science (CC
         BY-SA 2.1 JP) / Z-Anatomy (CC BY-SA 4.0). Exercise data: ExerciseDB
         (hasaneyldrm/exercises-dataset, MIT).

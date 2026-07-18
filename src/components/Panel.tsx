@@ -68,16 +68,22 @@ export function Panel({ meshName, muscle }: PanelProps) {
     () =>
       all.filter(
         (ex) =>
-          (!primaryOnly || ex.isPrimary) &&
-          (!equip || ex.equipment === equip),
+          (!primaryOnly || ex.isPrimary) && (!equip || ex.equipment === equip),
       ),
     [all, primaryOnly, equip],
   )
 
   if (!meshName) {
     return (
-      <div className="flex h-full items-center justify-center p-6 text-center text-neutral-500">
-        點選左側的肌肉,這裡會列出推薦訓練動作
+      <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full border border-line text-accent">
+          ✛
+        </div>
+        <p className="text-sm text-ink-3">
+          點選左側肌肉,或開啟「肌肉清單」
+          <br />
+          這裡會列出推薦訓練動作
+        </p>
       </div>
     )
   }
@@ -90,30 +96,33 @@ export function Panel({ meshName, muscle }: PanelProps) {
     .trim()
 
   const chip = (active: boolean) =>
-    'rounded-full px-2.5 py-0.5 text-xs transition-colors ' +
+    'rounded-full px-2.5 py-1 text-xs font-medium transition-colors ' +
     (active
-      ? 'bg-blue-500/25 text-blue-200 ring-1 ring-blue-400/50'
-      : 'bg-neutral-800 text-neutral-400 hover:text-neutral-200')
+      ? 'bg-accent/20 text-accent ring-1 ring-accent/40'
+      : 'bg-surface-2 text-ink-3 ring-1 ring-line hover:text-ink-2')
 
   return (
     <div className="flex h-full flex-col">
-      {/* 標頭:中文肌肉名 + 英文原名 + 訓練分類 + 篩選標籤 */}
-      <div className="border-b border-neutral-800 p-4">
-        <h2 className="text-xl font-semibold text-neutral-100">{nameZh}</h2>
-        <div className="mt-0.5 text-xs tracking-wide text-neutral-500">
+      {/* 標頭 */}
+      <div className="border-b border-line p-5">
+        <h2 className="text-2xl font-semibold tracking-tight text-ink">
+          {nameZh}
+        </h2>
+        <div className="mt-1 text-xs tracking-wide text-ink-3 capitalize">
           {nameEn}
         </div>
 
         {muscle ? (
           <>
-            <div className="mt-2">
-              <span className="inline-flex items-center rounded-full bg-blue-500/15 px-2.5 py-0.5 text-sm text-blue-300">
-                訓練分類 · {muscle.labelZh}
+            <div className="mt-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-sm font-medium text-accent">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+                {muscle.labelZh}
               </span>
             </div>
 
             {/* 可點擊篩選標籤 */}
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-3 flex flex-wrap gap-1.5">
               <button
                 type="button"
                 onClick={() => setPrimaryOnly((v) => !v)}
@@ -134,8 +143,8 @@ export function Panel({ meshName, muscle }: PanelProps) {
             </div>
           </>
         ) : (
-          <div className="mt-2">
-            <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2.5 py-0.5 text-sm text-amber-400">
+          <div className="mt-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-warn/15 px-3 py-1 text-sm font-medium text-warn">
               尚未支援
             </span>
           </div>
@@ -143,81 +152,97 @@ export function Panel({ meshName, muscle }: PanelProps) {
       </div>
 
       {!muscle ? (
-        <div className="flex-1 p-4 text-sm text-neutral-500">
-          這塊肌肉不在目前支援的 12 個訓練肌群內。
+        <div className="flex-1 p-5 text-sm leading-relaxed text-ink-3">
+          這塊肌肉不在目前支援的 12 個訓練肌群內,因此沒有推薦動作。你仍可從左側清單瀏覽其他肌肉。
         </div>
       ) : (
-        <ul className="flex-1 space-y-2 overflow-y-auto p-4">
-          <li className="text-xs text-neutral-600">
-            {exercises.length} / {all.length} 個動作 · 授權 {provider.license}
-          </li>
-          {exercises.length === 0 && (
-            <li className="text-neutral-500">沒有符合篩選的動作</li>
-          )}
-          {exercises.map((ex) => {
-            const open = expandedId === ex.id
-            return (
-              <li
-                key={ex.id}
-                className="overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900/60"
-              >
-                <button
-                  type="button"
-                  onClick={() => setExpandedId(open ? null : ex.id)}
-                  className="flex w-full items-start gap-3 p-3 text-left hover:bg-neutral-800/40"
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex items-center justify-between px-5 pt-3 pb-1 text-xs text-ink-3">
+            <span>
+              <span className="tabular-nums text-ink-2">{exercises.length}</span>{' '}
+              / {all.length} 個動作
+            </span>
+            <span>{provider.label}</span>
+          </div>
+          <ul className="flex-1 space-y-2 overflow-y-auto px-4 pt-1 pb-4">
+            {exercises.length === 0 && (
+              <li className="px-1 py-6 text-center text-sm text-ink-3">
+                沒有符合篩選的動作
+              </li>
+            )}
+            {exercises.map((ex) => {
+              const open = expandedId === ex.id
+              return (
+                <li
+                  key={ex.id}
+                  className={
+                    'overflow-hidden rounded-xl border bg-surface-2 transition-colors ' +
+                    (open ? 'border-accent/40' : 'border-line hover:border-ink-3/40')
+                  }
                 >
-                  {ex.imageUrl && (
-                    <img
-                      src={ex.imageUrl}
-                      alt=""
-                      loading="lazy"
-                      className="h-14 w-14 flex-none rounded-md bg-neutral-800 object-cover"
-                    />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium text-neutral-100 capitalize">
-                      {ex.name}
-                    </div>
-                    <div className="mt-1 flex flex-wrap gap-1.5 text-xs">
-                      <span
-                        className={
-                          ex.isPrimary
-                            ? 'rounded bg-blue-500/20 px-1.5 py-0.5 text-blue-300'
-                            : 'rounded bg-neutral-700/40 px-1.5 py-0.5 text-neutral-400'
-                        }
-                      >
-                        {ex.isPrimary ? '主要' : '輔助'}
-                      </span>
-                      {ex.equipment && (
-                        <span className="rounded bg-neutral-700/40 px-1.5 py-0.5 text-neutral-400">
-                          {equipZh(ex.equipment)}
+                  <button
+                    type="button"
+                    onClick={() => setExpandedId(open ? null : ex.id)}
+                    className="flex w-full items-center gap-3 p-2.5 text-left"
+                  >
+                    {ex.imageUrl && (
+                      <img
+                        src={ex.imageUrl}
+                        alt=""
+                        loading="lazy"
+                        className="h-16 w-16 flex-none rounded-lg bg-ground object-cover"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-ink capitalize">
+                        {ex.name}
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
+                        <span
+                          className={
+                            ex.isPrimary
+                              ? 'rounded-md bg-accent/15 px-1.5 py-0.5 font-medium text-accent'
+                              : 'rounded-md bg-line/60 px-1.5 py-0.5 text-ink-3'
+                          }
+                        >
+                          {ex.isPrimary ? '主要' : '輔助'}
                         </span>
-                      )}
-                    </div>
-                  </div>
-                  <span className="flex-none pt-1 text-neutral-500">
-                    {open ? '▲' : '▼'}
-                  </span>
-                </button>
-
-                {open && ex.steps.length > 0 && (
-                  <ol className="list-decimal space-y-2.5 border-t border-neutral-800 px-4 py-3 pl-8 text-sm">
-                    {ex.steps.map((step, i) => (
-                      <li key={i}>
-                        <span className="text-neutral-300">{step}</span>
-                        {ex.stepsZh[i] && (
-                          <span className="mt-0.5 block text-neutral-400">
-                            {ex.stepsZh[i]}
+                        {ex.equipment && (
+                          <span className="rounded-md bg-line/60 px-1.5 py-0.5 text-ink-2">
+                            {equipZh(ex.equipment)}
                           </span>
                         )}
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </li>
-            )
-          })}
-        </ul>
+                      </div>
+                    </div>
+                    <span
+                      className={
+                        'flex-none text-ink-3 transition-transform ' +
+                        (open ? 'rotate-180' : '')
+                      }
+                    >
+                      ▾
+                    </span>
+                  </button>
+
+                  {open && ex.steps.length > 0 && (
+                    <ol className="list-decimal space-y-3 border-t border-line px-5 py-4 pl-8 text-sm marker:text-ink-3">
+                      {ex.steps.map((step, i) => (
+                        <li key={i}>
+                          <span className="text-ink-2">{step}</span>
+                          {ex.stepsZh[i] && (
+                            <span className="mt-1 block text-ink">
+                              {ex.stepsZh[i]}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        </div>
       )}
     </div>
   )

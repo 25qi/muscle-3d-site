@@ -7,7 +7,7 @@ const MODEL_URL = '/anatomy.glb'
 
 // 拖曳超過這個像素位移就算「旋轉」,不觸發點選
 const CLICK_THRESHOLD_PX = 5
-const HIGHLIGHT_COLOR = new THREE.Color('#3b82f6')
+const HIGHLIGHT_COLOR = new THREE.Color('#2dd4bf')
 const NO_EMISSIVE = new THREE.Color('#000000')
 
 interface AnatomyModelProps {

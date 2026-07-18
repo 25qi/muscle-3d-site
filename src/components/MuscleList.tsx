@@ -79,19 +79,19 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
     })
 
   return (
-    <div className="flex h-full w-64 flex-col border-r border-neutral-800 bg-neutral-950/95 text-neutral-200 backdrop-blur">
-      <div className="flex items-center gap-2 border-b border-neutral-800 p-3">
+    <div className="flex h-full w-64 flex-col border-r border-line bg-surface/95 text-ink backdrop-blur-md">
+      <div className="flex items-center gap-2 border-b border-line p-3">
         <input
           autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="搜尋肌肉(中/英)"
-          className="min-w-0 flex-1 rounded-md border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm text-neutral-100 outline-none focus:border-blue-400"
+          className="min-w-0 flex-1 rounded-lg border border-line bg-ground px-2.5 py-2 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-accent/60"
         />
         <button
           type="button"
           onClick={onClose}
-          className="flex-none rounded-md px-2 py-1 text-neutral-500 hover:text-neutral-200"
+          className="flex-none rounded-lg px-2 py-1.5 text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
           aria-label="關閉清單"
         >
           ✕
@@ -100,26 +100,38 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
 
       <div className="flex-1 overflow-y-auto">
         {groups.length === 0 && (
-          <div className="p-3 text-sm text-neutral-500">找不到符合的肌肉</div>
+          <div className="p-4 text-sm text-ink-3">找不到符合的肌肉</div>
         )}
         {groups.map((g) => {
           const expanded = q !== '' || open.has(g.id)
+          const unsupported = g.id === 'unsupported'
           return (
-            <div key={g.id} className="border-b border-neutral-800/60">
+            <div key={g.id} className="border-b border-line/60">
               <button
                 type="button"
                 onClick={() => toggle(g.id)}
-                className="flex w-full items-center justify-between px-3 py-2 text-left text-sm font-medium text-neutral-200 hover:bg-neutral-800/50"
+                className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-surface-2"
               >
                 <span
-                  className={g.id === 'unsupported' ? 'text-neutral-500' : ''}
+                  className={
+                    'flex items-center gap-2 ' +
+                    (unsupported ? 'text-ink-3' : 'text-ink')
+                  }
                 >
+                  {!unsupported && (
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent/70" />
+                  )}
                   {g.label}
-                  <span className="ml-1.5 text-xs text-neutral-600">
-                    {g.items.length}
-                  </span>
+                  <span className="text-xs text-ink-3">{g.items.length}</span>
                 </span>
-                <span className="text-neutral-600">{expanded ? '▲' : '▼'}</span>
+                <span
+                  className={
+                    'text-ink-3 transition-transform ' +
+                    (expanded ? 'rotate-180' : '')
+                  }
+                >
+                  ▾
+                </span>
               </button>
 
               {expanded && (
@@ -132,10 +144,10 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
                           type="button"
                           onClick={() => onSelect(it.base)}
                           className={
-                            'block w-full truncate py-1.5 pr-3 pl-6 text-left text-sm hover:bg-neutral-800/60 ' +
+                            'block w-full truncate border-l-2 py-1.5 pr-3 pl-5 text-left text-sm transition-colors ' +
                             (active
-                              ? 'bg-blue-500/15 text-blue-200'
-                              : 'text-neutral-300')
+                              ? 'border-accent bg-accent/10 text-accent'
+                              : 'border-transparent text-ink-2 hover:bg-surface-2 hover:text-ink')
                           }
                         >
                           {it.zh}
