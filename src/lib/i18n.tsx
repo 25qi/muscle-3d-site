@@ -64,6 +64,12 @@ const STR = {
   noGif: { en: 'No demo animation', zh: '無示範動圖' },
   overlapHere: { en: 'overlapping muscles here', zh: '塊重疊肌肉,你想選哪個?' },
   exercisesUnit: { en: 'exercises', zh: '個動作' },
+  feedback: { en: 'Feedback', zh: '留言' },
+  feedbackTitle: { en: 'Leave feedback', zh: '給作者留言' },
+  feedbackHint: {
+    en: 'Suggestions to improve this site — public, signed in with GitHub.',
+    zh: '給這個網站的改進建議(公開,使用 GitHub 帳號留言)。',
+  },
 } satisfies Record<string, Record<UiLang, string>>
 
 export type StrKey = keyof typeof STR

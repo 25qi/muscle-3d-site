@@ -11,7 +11,7 @@ const CLICK_THRESHOLD_PX = 5
 // 再加微弱同色自發光當選中光暈(底色已是青綠,不會像 emissive 打紅肌肉那樣發白)
 const HIGHLIGHT_TINT = new THREE.Color('#2dd4bf')
 const HIGHLIGHT_EMISSIVE = new THREE.Color('#2dd4bf')
-const HIGHLIGHT_INTENSITY = 0.9 // 提高自發光,配合 Bloom 產生外溢光暈
+const HIGHLIGHT_INTENSITY = 0.7 // 自發光強度(配合 Bloom;調低=更含蓄)
 const NO_EMISSIVE = new THREE.Color('#000000')
 
 interface AnatomyModelProps {

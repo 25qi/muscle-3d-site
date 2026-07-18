@@ -7,6 +7,7 @@ import { AnatomyModel, symmetryKey } from './components/AnatomyModel'
 import { Loader } from './components/Loader'
 import { Panel } from './components/Panel'
 import { MuscleList } from './components/MuscleList'
+import { FeedbackModal } from './components/FeedbackModal'
 import { muscleName } from './data/muscleNameZh'
 import { resolveMuscle } from './lib/recommend'
 import { useFavorites } from './lib/useFavorites'
@@ -119,6 +120,7 @@ function App() {
   const [pickList, setPickList] = useState<PickList | null>(null) // 游標下多塊重疊時的挑選清單
   const [focusGoal, setFocusGoal] = useState<FocusGoal | null>(null) // 鏡頭要平滑移到的目標
   const [showFavorites, setShowFavorites] = useState(false) // 是否顯示「我的最愛」
+  const [showFeedback, setShowFeedback] = useState(false) // 是否顯示留言板
   const { favorites, toggle: toggleFav } = useFavorites()
   const { lang, setLang } = useLang()
   const uiLang = useUiLang()
@@ -338,13 +340,14 @@ function App() {
               maxPolarAngle={Math.PI * 0.85}
             />
 
-            {/* Bloom:讓高亮肌肉的青綠自發光外溢成光暈(threshold 讓紅肌肉不發光) */}
+            {/* Bloom:讓高亮肌肉的青綠自發光「貼著肌肉」微微外溢(radius 小 = 不會變大圓圈) */}
             <EffectComposer enableNormalPass={false}>
               <Bloom
                 mipmapBlur
-                intensity={0.9}
-                luminanceThreshold={0.45}
-                luminanceSmoothing={0.25}
+                intensity={0.45}
+                radius={0.3}
+                luminanceThreshold={0.5}
+                luminanceSmoothing={0.2}
               />
             </EffectComposer>
           </Canvas>
@@ -372,6 +375,13 @@ function App() {
                     {favorites.size}
                   </span>
                 )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowFeedback(true)}
+                className={`${pill} flex items-center gap-1.5 px-3.5 py-2.5 text-sm text-ink-2 hover:text-ink`}
+              >
+                <span className="text-base">💬</span> {t('feedback')}
               </button>
               <div
                 className={`${pill} flex items-center gap-3 px-3.5 py-2.5 text-sm text-ink-2`}
@@ -550,6 +560,8 @@ function App() {
           />
         </aside>
       </div>
+
+      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
 
       {/* Footer 授權標註(CC BY-SA 法律義務,不可省) */}
       <footer className="border-t border-line bg-surface px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3">
