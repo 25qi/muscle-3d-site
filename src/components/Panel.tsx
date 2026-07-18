@@ -216,7 +216,7 @@ export function Panel({ meshName, muscle }: PanelProps) {
                     </div>
                     <span
                       className={
-                        'flex-none text-ink-3 transition-transform ' +
+                        'flex-none px-1 text-lg leading-none text-ink-3 transition-transform ' +
                         (open ? 'rotate-180' : '')
                       }
                     >

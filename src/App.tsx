@@ -103,12 +103,11 @@ function App() {
             </Suspense>
 
             {/* 允許上下旋轉,但限制 polar 範圍避免翻到正上方/正下方(人體全程保持正立) */}
-            {/* zoomToCursor: 滾輪縮放朝游標位置,而非畫面中心 */}
+            {/* 不用 zoomToCursor:讓縮放與旋轉都繞人體中心,拖曳一律「原地旋轉」不會漂成平移 */}
             <OrbitControls
               ref={controlsRef}
               enablePan={false}
               makeDefault
-              zoomToCursor
               minPolarAngle={Math.PI * 0.15}
               maxPolarAngle={Math.PI * 0.85}
             />
@@ -120,12 +119,12 @@ function App() {
               <button
                 type="button"
                 onClick={() => setShowList(true)}
-                className={`${pill} flex items-center gap-1.5 px-3 py-2 text-xs text-ink-2 hover:text-ink`}
+                className={`${pill} flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink-2 hover:text-ink`}
               >
-                <span className="text-accent">☰</span> 肌肉清單
+                <span className="text-base text-accent">☰</span> 肌肉清單
               </button>
               <div
-                className={`${pill} flex items-center gap-2.5 px-3 py-2 text-xs text-ink-2`}
+                className={`${pill} flex items-center gap-3 px-3.5 py-2.5 text-sm text-ink-2`}
               >
                 <span className="whitespace-nowrap">透明度</span>
                 <input
@@ -135,9 +134,9 @@ function App() {
                   step={0.05}
                   value={opacity}
                   onChange={(e) => setOpacity(Number(e.target.value))}
-                  className="w-24 accent-accent"
+                  className="h-1.5 w-28 accent-accent"
                 />
-                <span className="w-8 text-right tabular-nums text-ink">
+                <span className="w-9 text-right tabular-nums text-ink">
                   {Math.round(opacity * 100)}%
                 </span>
               </div>
@@ -148,9 +147,9 @@ function App() {
           <button
             type="button"
             onClick={resetView}
-            className={`${pill} absolute top-4 right-4 px-3 py-2 text-xs text-ink-2 hover:text-ink`}
+            className={`${pill} absolute top-4 right-4 flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink-2 hover:text-ink`}
           >
-            ⟲ 回正面視角
+            <span className="text-base">⟲</span> 回正面視角
           </button>
 
           {/* 品牌浮水印 */}
@@ -170,33 +169,55 @@ function App() {
             </div>
           )}
 
-          {/* ② 游標下重疊肌肉的挑選清單 */}
-          {pickList && (
-            <>
-              <div
-                className="fixed inset-0 z-30"
-                onClick={() => setPickList(null)}
-              />
-              <div
-                className="fixed z-40 max-h-64 w-56 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1.5 text-sm shadow-2xl backdrop-blur-md"
-                style={{ left: pickList.x + 4, top: pickList.y + 4 }}
-              >
-                <div className="px-3 py-1 text-[11px] text-ink-3">
-                  這裡有 {pickList.names.length} 塊重疊肌肉
-                </div>
-                {pickList.names.map((name) => (
-                  <button
-                    key={name}
-                    type="button"
-                    onClick={() => selectMuscle(name)}
-                    className="block w-full px-3 py-1.5 text-left text-ink-2 transition-colors hover:bg-accent/10 hover:text-ink"
+          {/* ② 游標下重疊肌肉的挑選清單(依視窗邊界自動往上/左翻,不超出畫面) */}
+          {pickList &&
+            (() => {
+              const PW = 224
+              const estH = Math.min(300, 44 + pickList.names.length * 34)
+              const left = Math.min(pickList.x + 6, window.innerWidth - PW - 8)
+              const flipUp = pickList.y + estH > window.innerHeight - 8
+              const top = flipUp
+                ? Math.max(8, pickList.y - estH)
+                : pickList.y + 6
+              return (
+                <>
+                  <div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setPickList(null)}
+                  />
+                  <div
+                    className="fixed z-40 max-h-[300px] w-56 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1.5 text-sm shadow-2xl backdrop-blur-md"
+                    style={{ left, top }}
                   >
-                    {muscleNameZh(name) ?? name}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+                    <div className="px-3 py-1 text-[11px] text-ink-3">
+                      這裡有 {pickList.names.length} 塊重疊肌肉
+                    </div>
+                    {pickList.names.map((name) => {
+                      const supported = resolveMuscle(name) !== null
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => selectMuscle(name)}
+                          className="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left transition-colors hover:bg-accent/10"
+                        >
+                          <span
+                            className={supported ? 'text-ink-2' : 'text-ink-3'}
+                          >
+                            {muscleNameZh(name) ?? name}
+                          </span>
+                          {!supported && (
+                            <span className="flex-none text-[10px] text-ink-3">
+                              未支援
+                            </span>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </>
+              )
+            })()}
 
           {toast && (
             <div className="pointer-events-none absolute bottom-16 left-1/2 -translate-x-1/2 rounded-full border border-warn/30 bg-surface-2/90 px-4 py-2 text-sm text-warn shadow-lg backdrop-blur-md">

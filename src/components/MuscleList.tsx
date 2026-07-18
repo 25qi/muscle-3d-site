@@ -126,7 +126,7 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
                 </span>
                 <span
                   className={
-                    'text-ink-3 transition-transform ' +
+                    'text-lg leading-none text-ink-3 transition-transform ' +
                     (expanded ? 'rotate-180' : '')
                   }
                 >
