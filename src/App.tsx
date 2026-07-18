@@ -92,6 +92,8 @@ function App() {
     const dist = (Math.max(size.y, size.x) / 2 / Math.tan(fov / 2)) * 1.3
     cam.position.set(center.x, center.y, center.z + dist)
     controls.target.copy(center)
+    // 鎖住縮小上限:最遠只能拉到「正面視角」的距離,不能再滾更小
+    controls.maxDistance = dist
     controls.update()
   }
 
@@ -273,7 +275,11 @@ function App() {
 
         {/* 右側動作面板 */}
         <aside className="h-1/2 w-full overflow-hidden border-t border-line bg-surface text-ink md:h-full md:w-[24rem] md:border-t-0 md:border-l">
-          <Panel meshName={selectedName} muscle={muscle} />
+          <Panel
+            meshName={selectedName}
+            muscle={muscle}
+            onOpenList={() => setShowList(true)}
+          />
         </aside>
       </div>
 

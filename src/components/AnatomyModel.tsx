@@ -7,9 +7,11 @@ const MODEL_URL = '/anatomy.glb'
 
 // 拖曳超過這個像素位移就算「旋轉」,不觸發點選
 const CLICK_THRESHOLD_PX = 5
-// 螢光綠(以綠為主、少紅少藍,打在紅色肌肉上才會呈綠色而非發白);低強度 = 微微發光
-const HIGHLIGHT_COLOR = new THREE.Color('#2bff7a')
-const HIGHLIGHT_INTENSITY = 0.8
+// 高亮:底色染成主色青綠(= 透明度拉桿那個綠,#2dd4bf),受燈光著色 → 保留立體感;
+// 再加微弱同色自發光當選中光暈(底色已是青綠,不會像 emissive 打紅肌肉那樣發白)
+const HIGHLIGHT_TINT = new THREE.Color('#2dd4bf')
+const HIGHLIGHT_EMISSIVE = new THREE.Color('#2dd4bf')
+const HIGHLIGHT_INTENSITY = 0.3 // 低強度,不蓋掉陰影
 const NO_EMISSIVE = new THREE.Color('#000000')
 
 interface AnatomyModelProps {
@@ -71,8 +73,10 @@ export function AnatomyModel({
     scene.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (mesh.isMesh && mesh.material) {
-        const mat = (mesh.material as THREE.Material).clone()
+        const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
         mat.side = THREE.DoubleSide
+        // 記下原始底色,取消高亮時還原
+        mesh.userData.baseColor = mat.color.clone()
         mesh.material = mat
       }
     })
@@ -88,8 +92,17 @@ export function AnatomyModel({
       // 不分左右:同一塊肌肉的左右兩邊一起高亮
       const isHighlighted =
         selectedKey !== null && symmetryKey(mesh.name) === selectedKey
-      mat.emissive.copy(isHighlighted ? HIGHLIGHT_COLOR : NO_EMISSIVE)
-      mat.emissiveIntensity = isHighlighted ? HIGHLIGHT_INTENSITY : 1
+      // 染綠底色(仍受燈光著色 → 保留立體感);未選則還原原始底色
+      if (isHighlighted) {
+        mat.color.copy(HIGHLIGHT_TINT)
+        mat.emissive.copy(HIGHLIGHT_EMISSIVE)
+        mat.emissiveIntensity = HIGHLIGHT_INTENSITY
+      } else {
+        const base = mesh.userData.baseColor as THREE.Color | undefined
+        if (base) mat.color.copy(base)
+        mat.emissive.copy(NO_EMISSIVE)
+        mat.emissiveIntensity = 1
+      }
       const o2 = isHighlighted ? 1 : opacity
       mat.opacity = o2
       mat.transparent = o2 < 1

@@ -8,6 +8,8 @@ interface PanelProps {
   meshName: string | null
   /** 解析到的肌群(null = 尚未支援) */
   muscle: MuscleDef | null
+  /** 開啟左側肌肉清單(空狀態引導卡的主要行動) */
+  onOpenList: () => void
 }
 
 // 器材中文對照(ExerciseDB 的 equipment 值 → 中文)
@@ -38,7 +40,7 @@ const equipZh = (e: string) => EQUIP_ZH[e] ?? e
 // 目前只有一個資料庫;若之後 providers 增加可再加分頁
 const provider = PROVIDERS[0]
 
-export function Panel({ meshName, muscle }: PanelProps) {
+export function Panel({ meshName, muscle, onOpenList }: PanelProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [primaryOnly, setPrimaryOnly] = useState(false)
   const [equip, setEquip] = useState<string | null>(null)
@@ -75,14 +77,31 @@ export function Panel({ meshName, muscle }: PanelProps) {
 
   if (!meshName) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full border border-line text-accent">
+      <div className="flex h-full flex-col items-center justify-center gap-6 p-8 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/15 text-3xl text-accent ring-1 ring-accent/30">
           ✛
         </div>
-        <p className="text-sm text-ink-3">
-          點選左側肌肉,或開啟「肌肉清單」
-          <br />
-          這裡會列出推薦訓練動作
+
+        <div className="space-y-1.5">
+          <h3 className="text-lg font-semibold text-ink">開始探索肌肉群</h3>
+          <p className="mx-auto max-w-[16rem] text-sm leading-relaxed text-ink-2">
+            選一塊肌肉,立刻看到最適合訓練它的動作、器材與分解步驟。
+          </p>
+        </div>
+
+        {/* 主要行動:開啟肌肉清單 */}
+        <button
+          type="button"
+          onClick={onOpenList}
+          className="hint-pulse flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-ground transition-transform hover:scale-[1.03]"
+        >
+          ☰ 開啟肌肉清單
+        </button>
+
+        {/* 次要提示:直接操作 3D */}
+        <p className="flex items-center gap-1.5 text-xs text-ink-3">
+          <span className="text-base">←</span>
+          或直接旋轉、點選左側的 3D 模型
         </p>
       </div>
     )
