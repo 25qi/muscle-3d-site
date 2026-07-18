@@ -3,7 +3,7 @@ import { MUSCLE_LIST } from '../data/muscleList'
 import { MUSCLE_MAP, groupLabel } from '../data/muscleMap'
 import { muscleNameEn, muscleNameZh } from '../data/muscleNameZh'
 import { resolveMuscle } from '../lib/recommend'
-import { useT, useUiLang } from '../lib/i18n'
+import { useLang, useT, useUiLang } from '../lib/i18n'
 
 interface MuscleListProps {
   selectedName: string | null
@@ -41,6 +41,7 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState<Set<string>>(new Set())
   const t = useT()
+  const { lang } = useLang()
   const uiLang = useUiLang()
   const en = uiLang === 'en'
   const nameOf = (it: Item) => (en ? it.en : it.zh)
@@ -53,7 +54,7 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
     const all = [
       ...MUSCLE_MAP.map((m) => ({
         id: m.id,
-        label: groupLabel(m, en),
+        label: groupLabel(m, lang),
         items: ITEMS.filter((it) => it.groupId === m.id),
       })),
       {
@@ -78,7 +79,7 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
       }))
       .filter((g) => g.items.length > 0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, en])
+  }, [q, en, lang])
 
   const toggle = (id: string) =>
     setOpen((prev) => {

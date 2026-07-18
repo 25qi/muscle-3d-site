@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { type MuscleDef, groupLabel } from '../data/muscleMap'
 import { muscleNameEn, muscleNameZh } from '../data/muscleNameZh'
-import { muscleTermZh } from '../data/muscleTermZh'
+import { muscleTerm } from '../data/muscleTerms'
 import { PROVIDERS, type NormalizedExercise } from '../lib/providers'
-import { useT, useUiLang } from '../lib/i18n'
+import { useLang, useT, useUiLang } from '../lib/i18n'
 import { ExerciseModal } from './ExerciseModal'
 
 interface PanelProps {
@@ -60,8 +60,9 @@ function ExerciseCard({
   onOpen: () => void
 }) {
   const t = useT()
+  const { lang } = useLang()
   const en = useUiLang() === 'en'
-  const term = (m: string) => (en ? m : muscleTermZh(m))
+  const term = (m: string) => muscleTerm(m, lang)
   const sep = en ? ', ' : '、'
   return (
     <li className="overflow-hidden rounded-xl border border-line bg-surface-2 transition-colors hover:border-ink-3/40">
@@ -147,6 +148,7 @@ export function Panel({
   const t = useT()
   const en = useUiLang() === 'en'
 
+  const { lang } = useLang()
   const isFav = (id: string) => favorites.has(id)
 
   // 切換肌肉/模式時重置篩選與燈箱
@@ -205,7 +207,7 @@ export function Panel({
       if (!g) {
         g = {
           key: ex.targetMuscle,
-          label: en ? ex.targetMuscle : muscleTermZh(ex.targetMuscle),
+          label: muscleTerm(ex.targetMuscle, lang),
           items: [],
         }
         groups.push(g)
@@ -318,7 +320,7 @@ export function Panel({
             <div className="mt-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-sm font-medium text-accent">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-                {groupLabel(muscle, en)}
+                {groupLabel(muscle, lang)}
               </span>
             </div>
 

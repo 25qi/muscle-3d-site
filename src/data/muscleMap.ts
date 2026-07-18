@@ -1,3 +1,5 @@
+import type { Lang } from '../lib/i18n'
+
 /**
  * muscleMap.ts
  *
@@ -131,22 +133,23 @@ export const MUSCLE_MAP: MuscleDef[] = [
   },
 ];
 
-// 12 訓練肌群的英文標籤(介面英文時用;labelZh 為中文)
-const LABEL_EN: Record<string, string> = {
-  chest: 'Chest',
-  lats: 'Lats',
-  traps: 'Traps',
-  shoulders: 'Shoulders',
-  biceps: 'Biceps',
-  triceps: 'Triceps',
-  forearms: 'Forearms',
-  abs: 'Abs',
-  glutes: 'Glutes',
-  quads: 'Quads',
-  hamstrings: 'Hamstrings',
-  calves: 'Calves',
+// 12 訓練肌群各語言標籤;缺該語言 → 英文(en/ru/ko/hi 用英文)
+type GroupTr = Partial<Record<Lang, string>>
+const GROUP_LABELS: Record<string, GroupTr> = {
+  chest: { en: 'Chest', es: 'Pecho', fr: 'Pectoraux', it: 'Petto', pl: 'Klatka', tr: 'Göğüs' },
+  lats: { en: 'Lats', es: 'Dorsales', fr: 'Grand dorsal', it: 'Dorsali', pl: 'Najszersze', tr: 'Kanat' },
+  traps: { en: 'Traps', es: 'Trapecio', fr: 'Trapèzes', it: 'Trapezio', pl: 'Czworoboczny', tr: 'Trapez' },
+  shoulders: { en: 'Shoulders', es: 'Hombros', fr: 'Épaules', it: 'Spalle', pl: 'Barki', tr: 'Omuz' },
+  biceps: { en: 'Biceps', es: 'Bíceps', fr: 'Biceps', it: 'Bicipiti', pl: 'Biceps', tr: 'Biceps' },
+  triceps: { en: 'Triceps', es: 'Tríceps', fr: 'Triceps', it: 'Tricipiti', pl: 'Triceps', tr: 'Triceps' },
+  forearms: { en: 'Forearms', es: 'Antebrazos', fr: 'Avant-bras', it: 'Avambracci', pl: 'Przedramiona', tr: 'Ön kol' },
+  abs: { en: 'Abs', es: 'Abdominales', fr: 'Abdominaux', it: 'Addominali', pl: 'Brzuch', tr: 'Karın' },
+  glutes: { en: 'Glutes', es: 'Glúteos', fr: 'Fessiers', it: 'Glutei', pl: 'Pośladki', tr: 'Kalça' },
+  quads: { en: 'Quads', es: 'Cuádriceps', fr: 'Quadriceps', it: 'Quadricipiti', pl: 'Czworogłowy', tr: 'Quadriceps' },
+  hamstrings: { en: 'Hamstrings', es: 'Isquiotibiales', fr: 'Ischio-jambiers', it: 'Femorali', pl: 'Dwugłowy uda', tr: 'Hamstring' },
+  calves: { en: 'Calves', es: 'Gemelos', fr: 'Mollets', it: 'Polpacci', pl: 'Łydki', tr: 'Baldır' },
 }
 
-/** 依介面語言取肌群標籤(en=true → 英文,否則中文) */
-export const groupLabel = (m: MuscleDef, en: boolean): string =>
-  en ? (LABEL_EN[m.id] ?? m.id) : m.labelZh
+/** 依語言取肌群標籤(zh → 中文;其餘查表,缺 → 英文) */
+export const groupLabel = (m: MuscleDef, lang: Lang): string =>
+  lang === 'zh' ? m.labelZh : (GROUP_LABELS[m.id]?.[lang] ?? m.id)
