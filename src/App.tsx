@@ -1,8 +1,8 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import { Canvas, useThree } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
-import { AnatomyModel } from './components/AnatomyModel'
+import { AnatomyModel, symmetryKey } from './components/AnatomyModel'
 import { Loader } from './components/Loader'
 import { Panel } from './components/Panel'
 import { MuscleList } from './components/MuscleList'
@@ -13,6 +13,44 @@ interface PickList {
   names: string[]
   x: number
   y: number
+}
+
+interface FocusGoal {
+  pos: THREE.Vector3
+  target: THREE.Vector3
+}
+
+/** 平滑把相機移到 goal(面向選中的肌肉並置中);到位後呼叫 onDone。 */
+function FocusAnimator({
+  goal,
+  controlsRef,
+  onDone,
+}: {
+  goal: FocusGoal | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  controlsRef: React.RefObject<any>
+  onDone: () => void
+}) {
+  const camera = useThree((s) => s.camera)
+  useFrame((_, delta) => {
+    if (!goal) return
+    const controls = controlsRef.current
+    if (!controls) return
+    const t = 1 - Math.pow(0.0025, delta) // 幀率無關的指數趨近
+    camera.position.lerp(goal.pos, t)
+    controls.target.lerp(goal.target, t)
+    controls.update()
+    if (
+      camera.position.distanceTo(goal.pos) < 0.5 &&
+      controls.target.distanceTo(goal.target) < 0.5
+    ) {
+      camera.position.copy(goal.pos)
+      controls.target.copy(goal.target)
+      controls.update()
+      onDone()
+    }
+  })
+  return null
 }
 
 /**
@@ -63,6 +101,7 @@ function App() {
   const [opacity, setOpacity] = useState(0.7) // 肌肉透明度預設 70%(可透視深層)
   const [showList, setShowList] = useState(false) // 是否顯示可搜尋肌肉清單
   const [pickList, setPickList] = useState<PickList | null>(null) // 游標下多塊重疊時的挑選清單
+  const [focusGoal, setFocusGoal] = useState<FocusGoal | null>(null) // 鏡頭要平滑移到的目標
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null)
   const groupRef = useRef<THREE.Group>(null)
@@ -73,10 +112,55 @@ function App() {
     setPickList(null)
   }
 
-  // 點擊 3D:只有一塊直接選;多塊重疊則跳清單讓使用者挑
+  // 從清單選肌肉:選取 + 讓鏡頭平滑轉到「面向該肌肉」並置中
+  const focusMuscle = (name: string) => {
+    setSelectedName(name)
+    setPickList(null)
+    const group = groupRef.current
+    const controls = controlsRef.current
+    if (!group || !controls) return
+
+    // 該肌肉(含左右兩側)的世界包圍盒
+    const key = symmetryKey(name)
+    const box = new THREE.Box3()
+    let found = false
+    group.traverse((o) => {
+      const mesh = o as THREE.Mesh
+      if (mesh.isMesh && symmetryKey(mesh.name) === key) {
+        box.expandByObject(mesh)
+        found = true
+      }
+    })
+    if (!found || box.isEmpty()) return
+
+    const mCenter = box.getCenter(new THREE.Vector3())
+    const radius = box.getSize(new THREE.Vector3()).length() / 2
+    const bodyCenter = getCentroid(group)
+    // 面向該肌肉:身體中心指向肌肉的水平方向(前面肌肉→前方、背面→後方、側面→側向)
+    const dir = new THREE.Vector3(
+      mCenter.x - bodyCenter.x,
+      0,
+      mCenter.z - bodyCenter.z,
+    )
+    if (dir.lengthSq() < 1e-4) dir.set(0, 0, 1)
+    dir.normalize()
+
+    const cam = controls.object as THREE.PerspectiveCamera
+    const fov = (cam.fov * Math.PI) / 180
+    let dist = (radius / Math.tan(fov / 2)) * 2.4 // 讓肌肉佔畫面約一半、留點周邊
+    dist = Math.min(dist, controls.maxDistance ?? dist)
+    dist = Math.max(dist, 120)
+
+    setFocusGoal({
+      pos: mCenter.clone().addScaledVector(dir, dist),
+      target: mCenter.clone(),
+    })
+  }
+
+  // 點擊 3D:先幫他選最前面那塊(直接高亮);若有多塊重疊,再跳清單讓他改選
   const handlePick = (names: string[], x: number, y: number) => {
-    if (names.length === 1) selectMuscle(names[0])
-    else setPickList({ names, x, y })
+    setSelectedName(names[0])
+    setPickList(names.length > 1 ? { names, x, y } : null)
   }
 
   // 幾何重心(頂點平均)—— 比包圍盒中心更接近視覺質量中心;只算一次並快取
@@ -178,6 +262,13 @@ function App() {
             {/* 情境式拖曳:按下時判斷游標下有無模型,切換旋轉/平移 */}
             <DragMode groupRef={groupRef} controlsRef={controlsRef} />
 
+            {/* 從清單選肌肉時,平滑把鏡頭轉到該肌肉並置中 */}
+            <FocusAnimator
+              goal={focusGoal}
+              controlsRef={controlsRef}
+              onDone={() => setFocusGoal(null)}
+            />
+
             {/* 允許平移(拖空白處)+ 上下旋轉;polar 範圍避免翻到正上方/正下方 */}
             <OrbitControls
               ref={controlsRef}
@@ -239,7 +330,7 @@ function App() {
             <div className="absolute inset-y-0 left-0 z-20">
               <MuscleList
                 selectedName={selectedName}
-                onSelect={selectMuscle}
+                onSelect={focusMuscle}
                 onClose={() => setShowList(false)}
               />
             </div>
@@ -266,19 +357,29 @@ function App() {
                     style={{ left, top }}
                   >
                     <div className="px-3 py-1 text-[11px] text-ink-3">
-                      這裡有 {pickList.names.length} 塊重疊肌肉
+                      這裡有 {pickList.names.length} 塊重疊肌肉 你想選擇的是？
                     </div>
                     {pickList.names.map((name) => {
                       const supported = resolveMuscle(name) !== null
+                      const active = name === selectedName
                       return (
                         <button
                           key={name}
                           type="button"
                           onClick={() => selectMuscle(name)}
-                          className="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left transition-colors hover:bg-accent/10"
+                          className={
+                            'flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left transition-colors hover:bg-accent/10 ' +
+                            (active ? 'bg-accent/10' : '')
+                          }
                         >
                           <span
-                            className={supported ? 'text-ink-2' : 'text-ink-3'}
+                            className={
+                              active
+                                ? 'font-medium text-accent'
+                                : supported
+                                  ? 'text-ink-2'
+                                  : 'text-ink-3'
+                            }
                           >
                             {muscleNameZh(name) ?? name}
                           </span>

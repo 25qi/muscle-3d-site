@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { MuscleDef } from '../data/muscleMap'
 import { muscleNameZh } from '../data/muscleNameZh'
 import { PROVIDERS } from '../lib/providers'
+import { useFavorites } from '../lib/useFavorites'
 
 interface PanelProps {
   /** 被點到的 mesh 原始解剖名稱(null = 還沒點) */
@@ -43,12 +44,15 @@ const provider = PROVIDERS[0]
 export function Panel({ meshName, muscle, onOpenList }: PanelProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [primaryOnly, setPrimaryOnly] = useState(false)
+  const [favOnly, setFavOnly] = useState(false)
   const [equip, setEquip] = useState<string | null>(null)
+  const { toggle: toggleFav, isFavorite } = useFavorites()
 
   // 切換肌肉時重置展開與篩選
   useEffect(() => {
     setExpandedId(null)
     setPrimaryOnly(false)
+    setFavOnly(false)
     setEquip(null)
   }, [meshName])
 
@@ -70,9 +74,11 @@ export function Panel({ meshName, muscle, onOpenList }: PanelProps) {
     () =>
       all.filter(
         (ex) =>
-          (!primaryOnly || ex.isPrimary) && (!equip || ex.equipment === equip),
+          (!primaryOnly || ex.isPrimary) &&
+          (!equip || ex.equipment === equip) &&
+          (!favOnly || isFavorite(ex.id)),
       ),
-    [all, primaryOnly, equip],
+    [all, primaryOnly, equip, favOnly, isFavorite],
   )
 
   if (!meshName) {
@@ -144,6 +150,13 @@ export function Panel({ meshName, muscle, onOpenList }: PanelProps) {
             <div className="mt-3 flex flex-wrap gap-1.5">
               <button
                 type="button"
+                onClick={() => setFavOnly((v) => !v)}
+                className={chip(favOnly)}
+              >
+                ★ 只看最愛
+              </button>
+              <button
+                type="button"
                 onClick={() => setPrimaryOnly((v) => !v)}
                 className={chip(primaryOnly)}
               >
@@ -199,49 +212,70 @@ export function Panel({ meshName, muscle, onOpenList }: PanelProps) {
                     (open ? 'border-accent/40' : 'border-line hover:border-ink-3/40')
                   }
                 >
-                  <button
-                    type="button"
-                    onClick={() => setExpandedId(open ? null : ex.id)}
-                    className="flex w-full items-center gap-3 p-2.5 text-left"
-                  >
-                    {ex.imageUrl && (
-                      <img
-                        src={ex.imageUrl}
-                        alt=""
-                        loading="lazy"
-                        className="h-16 w-16 flex-none rounded-lg bg-ground object-cover"
-                      />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <div className="font-medium text-ink capitalize">
-                        {ex.name}
-                      </div>
-                      <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
-                        <span
-                          className={
-                            ex.isPrimary
-                              ? 'rounded-md bg-accent/15 px-1.5 py-0.5 font-medium text-accent'
-                              : 'rounded-md bg-line/60 px-1.5 py-0.5 text-ink-3'
-                          }
-                        >
-                          {ex.isPrimary ? '主要' : '輔助'}
-                        </span>
-                        {ex.equipment && (
-                          <span className="rounded-md bg-line/60 px-1.5 py-0.5 text-ink-2">
-                            {equipZh(ex.equipment)}
+                  <div className="flex items-center gap-2 p-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setExpandedId(open ? null : ex.id)}
+                      className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                    >
+                      {ex.imageUrl && (
+                        <img
+                          src={ex.imageUrl}
+                          alt=""
+                          loading="lazy"
+                          className="h-16 w-16 flex-none rounded-lg bg-ground object-cover"
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-ink capitalize">
+                          {ex.name}
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
+                          <span
+                            className={
+                              ex.isPrimary
+                                ? 'rounded-md bg-accent/15 px-1.5 py-0.5 font-medium text-accent'
+                                : 'rounded-md bg-line/60 px-1.5 py-0.5 text-ink-3'
+                            }
+                          >
+                            {ex.isPrimary ? '主要' : '輔助'}
                           </span>
-                        )}
+                          {ex.equipment && (
+                            <span className="rounded-md bg-line/60 px-1.5 py-0.5 text-ink-2">
+                              {equipZh(ex.equipment)}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <span
+                    </button>
+
+                    {/* 加入最愛 */}
+                    <button
+                      type="button"
+                      onClick={() => toggleFav(ex.id)}
+                      aria-label={isFavorite(ex.id) ? '移除最愛' : '加入最愛'}
+                      className={
+                        'flex-none px-1 text-lg leading-none transition-colors ' +
+                        (isFavorite(ex.id)
+                          ? 'text-warn'
+                          : 'text-ink-3 hover:text-warn')
+                      }
+                    >
+                      {isFavorite(ex.id) ? '★' : '☆'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setExpandedId(open ? null : ex.id)}
+                      aria-label={open ? '收合' : '展開'}
                       className={
                         'flex-none px-1 text-lg leading-none text-ink-3 transition-transform ' +
                         (open ? 'rotate-180' : '')
                       }
                     >
                       ▾
-                    </span>
-                  </button>
+                    </button>
+                  </div>
 
                   {open && ex.steps.length > 0 && (
                     <ol className="list-decimal space-y-3 border-t border-line px-5 py-4 pl-8 text-sm marker:text-ink-3">

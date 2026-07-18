@@ -37,7 +37,7 @@ function meshNameOf(obj: THREE.Object3D): string {
  * 對稱鍵:去掉 left/right 與底線後的肌肉名,用來讓左右同名肌肉一起高亮。
  * e.g. "left_gluteus_maximus" / "right_gluteus_maximus" -> "gluteus maximus"
  */
-function symmetryKey(name: string): string {
+export function symmetryKey(name: string): string {
   return name
     .toLowerCase()
     .replace(/_/g, ' ')
