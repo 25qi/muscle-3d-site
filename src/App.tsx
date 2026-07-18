@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
+import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { AnatomyModel, symmetryKey } from './components/AnatomyModel'
 import { Loader } from './components/Loader'
@@ -336,6 +337,16 @@ function App() {
               minPolarAngle={Math.PI * 0.15}
               maxPolarAngle={Math.PI * 0.85}
             />
+
+            {/* Bloom:讓高亮肌肉的青綠自發光外溢成光暈(threshold 讓紅肌肉不發光) */}
+            <EffectComposer enableNormalPass={false}>
+              <Bloom
+                mipmapBlur
+                intensity={0.9}
+                luminanceThreshold={0.45}
+                luminanceSmoothing={0.25}
+              />
+            </EffectComposer>
           </Canvas>
 
           {/* 左上控制列:肌肉清單開關 + 透明度滑桿 */}
@@ -433,9 +444,18 @@ function App() {
           </div>
 
           {/* 品牌浮水印 */}
-          <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-2 text-xs text-ink-3">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-            {t('brand')}
+          <div className="pointer-events-none absolute bottom-4 left-4 text-ink-3">
+            <div className="flex items-center gap-1.5">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+              <span className="text-base font-semibold tracking-tight text-ink-2">
+                Vector
+              </span>
+            </div>
+            <div className="mt-0.5 pl-3 text-[11px] leading-tight">
+              3D Muscle Explorer
+              <br />
+              by veky · 2026
+            </div>
           </div>
 
           {/* ④ 可搜尋肌肉清單(左側浮層) */}
