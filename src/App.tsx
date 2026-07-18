@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { AnatomyModel } from './components/AnatomyModel'
@@ -13,6 +13,48 @@ interface PickList {
   names: string[]
   x: number
   y: number
+}
+
+/**
+ * 情境式拖曳:按下時判斷游標下有沒有模型。
+ * 有 → 左鍵/單指=旋轉;沒有(空白處)→ 平移。
+ * 用 capture 階段搶在 OrbitControls 之前設定,才會即時生效。
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function DragMode({
+  groupRef,
+  controlsRef,
+}: {
+  groupRef: React.RefObject<THREE.Group | null>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  controlsRef: React.RefObject<any>
+}) {
+  const gl = useThree((s) => s.gl)
+  const camera = useThree((s) => s.camera)
+  const raycaster = useThree((s) => s.raycaster)
+
+  useEffect(() => {
+    const el = gl.domElement
+    const ndc = new THREE.Vector2()
+    const onDown = (e: PointerEvent) => {
+      const controls = controlsRef.current
+      const group = groupRef.current
+      if (!controls || !group) return
+      const rect = el.getBoundingClientRect()
+      ndc.set(
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1,
+      )
+      raycaster.setFromCamera(ndc, camera)
+      const onModel = raycaster.intersectObject(group, true).length > 0
+      controls.mouseButtons.LEFT = onModel ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN
+      controls.touches.ONE = onModel ? THREE.TOUCH.ROTATE : THREE.TOUCH.PAN
+    }
+    el.addEventListener('pointerdown', onDown, true)
+    return () => el.removeEventListener('pointerdown', onDown, true)
+  }, [gl, camera, raycaster, groupRef, controlsRef])
+
+  return null
 }
 
 function App() {
@@ -102,11 +144,14 @@ function App() {
               </group>
             </Suspense>
 
-            {/* 允許上下旋轉,但限制 polar 範圍避免翻到正上方/正下方(人體全程保持正立) */}
-            {/* 不用 zoomToCursor:讓縮放與旋轉都繞人體中心,拖曳一律「原地旋轉」不會漂成平移 */}
+            {/* 情境式拖曳:按下時判斷游標下有無模型,切換旋轉/平移 */}
+            <DragMode groupRef={groupRef} controlsRef={controlsRef} />
+
+            {/* 允許平移(拖空白處)+ 上下旋轉;polar 範圍避免翻到正上方/正下方 */}
             <OrbitControls
               ref={controlsRef}
-              enablePan={false}
+              enablePan
+              screenSpacePanning
               makeDefault
               minPolarAngle={Math.PI * 0.15}
               maxPolarAngle={Math.PI * 0.85}

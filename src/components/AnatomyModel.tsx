@@ -7,7 +7,9 @@ const MODEL_URL = '/anatomy.glb'
 
 // 拖曳超過這個像素位移就算「旋轉」,不觸發點選
 const CLICK_THRESHOLD_PX = 5
-const HIGHLIGHT_COLOR = new THREE.Color('#2dd4bf')
+// 螢光綠(以綠為主、少紅少藍,打在紅色肌肉上才會呈綠色而非發白);低強度 = 微微發光
+const HIGHLIGHT_COLOR = new THREE.Color('#2bff7a')
+const HIGHLIGHT_INTENSITY = 0.8
 const NO_EMISSIVE = new THREE.Color('#000000')
 
 interface AnatomyModelProps {
@@ -87,6 +89,7 @@ export function AnatomyModel({
       const isHighlighted =
         selectedKey !== null && symmetryKey(mesh.name) === selectedKey
       mat.emissive.copy(isHighlighted ? HIGHLIGHT_COLOR : NO_EMISSIVE)
+      mat.emissiveIntensity = isHighlighted ? HIGHLIGHT_INTENSITY : 1
       const o2 = isHighlighted ? 1 : opacity
       mat.opacity = o2
       mat.transparent = o2 < 1
