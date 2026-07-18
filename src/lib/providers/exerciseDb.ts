@@ -3,6 +3,7 @@
  * 附 GIF 動圖、target/secondary 肌肉。動作選擇較現代。
  */
 import edbData from '../../data/exercisedb.json'
+import { muscleTermZh } from '../../data/muscleTermZh'
 import type { ExerciseProvider, NormalizedExercise } from './types'
 
 interface RawEdb {
@@ -18,6 +19,7 @@ interface RawEdb {
 }
 
 const exercises = edbData as unknown as RawEdb[]
+const byIdMap = new Map(exercises.map((e) => [e.id, e]))
 const GIF_BASE =
   'https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/'
 
@@ -35,6 +37,34 @@ const TARGETS: Record<string, string[]> = {
   quads: ['quads'],
   hamstrings: ['hamstrings'],
   calves: ['calves'],
+}
+
+// 次要肌肉去掉與主要重複的,並轉中文
+function secondaryZh(target: string, secondary: string[]): string[] {
+  const seen = new Set<string>([muscleTermZh(target)])
+  const out: string[] = []
+  for (const m of secondary ?? []) {
+    const zh = muscleTermZh(m)
+    if (seen.has(zh)) continue
+    seen.add(zh)
+    out.push(zh)
+  }
+  return out
+}
+
+function normalize(ex: RawEdb, isPrimary: boolean): NormalizedExercise {
+  return {
+    id: ex.id,
+    name: ex.name,
+    isPrimary,
+    targetMuscle: muscleTermZh(ex.target),
+    secondaryMuscles: secondaryZh(ex.target, ex.secondary),
+    equipment: ex.equipment,
+    level: null,
+    imageUrl: ex.gif ? GIF_BASE + ex.gif : null,
+    steps: ex.steps,
+    stepsZh: ex.stepsZh ?? [],
+  }
 }
 
 export const exerciseDbProvider: ExerciseProvider = {
@@ -59,17 +89,10 @@ export const exerciseDbProvider: ExerciseProvider = {
       return a.ex.name.localeCompare(b.ex.name)
     })
 
-    return ranked.map(
-      ({ ex, isPrimary }): NormalizedExercise => ({
-        id: ex.id,
-        name: ex.name,
-        isPrimary,
-        equipment: ex.equipment,
-        level: null,
-        imageUrl: ex.gif ? GIF_BASE + ex.gif : null,
-        steps: ex.steps,
-        stepsZh: ex.stepsZh ?? [],
-      }),
-    )
+    return ranked.map(({ ex, isPrimary }) => normalize(ex, isPrimary))
+  },
+  byId(id) {
+    const ex = byIdMap.get(id)
+    return ex ? normalize(ex, true) : null
   },
 }

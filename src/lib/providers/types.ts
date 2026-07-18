@@ -13,6 +13,10 @@ export interface NormalizedExercise {
   name: string
   /** true = 該肌群是主要目標;false = 輔助 */
   isPrimary: boolean
+  /** 這個動作主要訓練的肌肉(中文) */
+  targetMuscle: string
+  /** 這個動作同時訓練到的其他肌肉(中文) */
+  secondaryMuscles: string[]
   equipment: string | null
   /** 難度(有些資料庫沒有 → null) */
   level: string | null
@@ -33,4 +37,6 @@ export interface ExerciseProvider {
   license: string
   /** 給定 muscleId,回傳排序後的正規化動作清單 */
   forMuscle(muscleId: string): NormalizedExercise[]
+  /** 依動作 id 取單筆(給「我的最愛」用);找不到回 null */
+  byId(id: string): NormalizedExercise | null
 }

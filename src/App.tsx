@@ -8,6 +8,7 @@ import { Panel } from './components/Panel'
 import { MuscleList } from './components/MuscleList'
 import { muscleNameZh } from './data/muscleNameZh'
 import { resolveMuscle } from './lib/recommend'
+import { useFavorites } from './lib/useFavorites'
 
 interface PickList {
   names: string[]
@@ -102,6 +103,8 @@ function App() {
   const [showList, setShowList] = useState(false) // 是否顯示可搜尋肌肉清單
   const [pickList, setPickList] = useState<PickList | null>(null) // 游標下多塊重疊時的挑選清單
   const [focusGoal, setFocusGoal] = useState<FocusGoal | null>(null) // 鏡頭要平滑移到的目標
+  const [showFavorites, setShowFavorites] = useState(false) // 是否顯示「我的最愛」
+  const { favorites, toggle: toggleFav } = useFavorites()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null)
   const groupRef = useRef<THREE.Group>(null)
@@ -110,12 +113,14 @@ function App() {
   const selectMuscle = (name: string) => {
     setSelectedName(name)
     setPickList(null)
+    setShowFavorites(false)
   }
 
   // 從清單選肌肉:選取 + 讓鏡頭平滑轉到「面向該肌肉」並置中
   const focusMuscle = (name: string) => {
     setSelectedName(name)
     setPickList(null)
+    setShowFavorites(false)
     const group = groupRef.current
     const controls = controlsRef.current
     if (!group || !controls) return
@@ -161,6 +166,7 @@ function App() {
   const handlePick = (names: string[], x: number, y: number) => {
     setSelectedName(names[0])
     setPickList(names.length > 1 ? { names, x, y } : null)
+    setShowFavorites(false)
   }
 
   // 幾何重心(頂點平均)—— 比包圍盒中心更接近視覺質量中心;只算一次並快取
@@ -290,6 +296,20 @@ function App() {
               >
                 <span className="text-base text-accent">☰</span> 肌肉清單
               </button>
+              <button
+                type="button"
+                onClick={() => setShowFavorites((v) => !v)}
+                className={`${pill} flex items-center gap-1.5 px-3.5 py-2.5 text-sm ${
+                  showFavorites ? 'text-warn' : 'text-ink-2 hover:text-ink'
+                }`}
+              >
+                <span className="text-base text-warn">★</span> 我的最愛
+                {favorites.size > 0 && (
+                  <span className="tabular-nums text-ink-3">
+                    {favorites.size}
+                  </span>
+                )}
+              </button>
               <div
                 className={`${pill} flex items-center gap-3 px-3.5 py-2.5 text-sm text-ink-2`}
               >
@@ -409,6 +429,10 @@ function App() {
             meshName={selectedName}
             muscle={muscle}
             onOpenList={() => setShowList(true)}
+            showFavorites={showFavorites}
+            onCloseFavorites={() => setShowFavorites(false)}
+            favorites={favorites}
+            toggleFav={toggleFav}
           />
         </aside>
       </div>
