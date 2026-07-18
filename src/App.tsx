@@ -66,6 +66,7 @@ function App() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null)
   const groupRef = useRef<THREE.Group>(null)
+  const centroidRef = useRef<THREE.Vector3 | null>(null) // 幾何重心(只算一次)
 
   const selectMuscle = (name: string) => {
     setSelectedName(name)
@@ -78,20 +79,48 @@ function App() {
     else setPickList({ names, x, y })
   }
 
-  // 回正面視角:依模型實際包圍盒中心對準,正面水平框好(不會從腳往上看)
+  // 幾何重心(頂點平均)—— 比包圍盒中心更接近視覺質量中心;只算一次並快取
+  const getCentroid = (group: THREE.Group): THREE.Vector3 => {
+    if (centroidRef.current) return centroidRef.current
+    const c = new THREE.Vector3()
+    const v = new THREE.Vector3()
+    let n = 0
+    group.updateWorldMatrix(true, true)
+    group.traverse((o) => {
+      const mesh = o as THREE.Mesh
+      if (!mesh.isMesh) return
+      const pos = mesh.geometry.attributes.position as
+        | THREE.BufferAttribute
+        | undefined
+      if (!pos) return
+      for (let i = 0; i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld)
+        c.add(v)
+        n++
+      }
+    })
+    if (n > 0) c.multiplyScalar(1 / n)
+    centroidRef.current = c
+    return c
+  }
+
+  // 回正面視角:左右旋轉樞紐用「重心 XZ」(才會原地旋轉),Y 用包圍盒中心(畫面置中)
   const resetView = () => {
     const group = groupRef.current
     const controls = controlsRef.current
     if (!group || !controls) return
     const box = new THREE.Box3().setFromObject(group)
-    const center = box.getCenter(new THREE.Vector3())
+    const bboxC = box.getCenter(new THREE.Vector3())
     const size = box.getSize(new THREE.Vector3())
+    const cen = getCentroid(group)
+    // 旋轉樞紐:XZ 取重心(消除左右旋轉的小圓漂移),Y 取包圍盒中心(維持垂直置中)
+    const target = new THREE.Vector3(cen.x, bboxC.y, cen.z)
     const cam = controls.object as THREE.PerspectiveCamera
     const fov = (cam.fov * Math.PI) / 180
     // 依身高/身寬算出剛好框滿的距離,再留一點邊界
     const dist = (Math.max(size.y, size.x) / 2 / Math.tan(fov / 2)) * 1.3
-    cam.position.set(center.x, center.y, center.z + dist)
-    controls.target.copy(center)
+    cam.position.set(target.x, target.y, target.z + dist)
+    controls.target.copy(target)
     // 鎖住縮小上限:最遠只能拉到「正面視角」的距離,不能再滾更小
     controls.maxDistance = dist
     controls.update()
