@@ -51,11 +51,11 @@ npx @gltf-transform/cli optimize <src>.glb public/anatomy.glb --compress meshopt
 # 25.13 MB → 6.88 MB
 ```
 
-動作資料庫用 [`yuhonas/free-exercise-db`](https://github.com/yuhonas/free-exercise-db)(Public Domain),已下載打包進 `src/data/exercises.json`。
+動作資料庫用 [`hasaneyldrm/exercises-dataset`](https://github.com/hasaneyldrm/exercises-dataset)(ExerciseDB,MIT,1324 個動作 + GIF),精簡必要欄位後打包進 `src/data/exercisedb.json`。每個資料庫是 `src/lib/providers/` 下一個獨立 provider,方便替換。
 
 ## 授權
 
 本專案原始碼可自訂授權(CC BY-SA 只約束模型資產,不傳染到程式碼)。
 
 - **Anatomy model**: BodyParts3D © The Database Center for Life Science (CC BY-SA 2.1 JP) / Z-Anatomy (CC BY-SA 4.0)
-- **Exercise data**: free-exercise-db (Public Domain)
+- **Exercise data**: ExerciseDB — hasaneyldrm/exercises-dataset (MIT)

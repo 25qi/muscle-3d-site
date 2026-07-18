@@ -1,38 +1,82 @@
 import { useMemo, useState } from 'react'
 import { MUSCLE_LIST } from '../data/muscleList'
+import { MUSCLE_MAP } from '../data/muscleMap'
 import { muscleNameZh } from '../data/muscleNameZh'
 import { resolveMuscle } from '../lib/recommend'
 
 interface MuscleListProps {
-  /** 目前選中的名稱(用來標示 active) */
   selectedName: string | null
-  /** 點清單項目時回呼該肌肉基本名(可直接當 selectedName) */
   onSelect: (name: string) => void
   onClose: () => void
 }
 
-// 預先算好每條肌肉的中文名與是否支援(只算一次)
-const ITEMS = MUSCLE_LIST.map((base) => ({
+interface Item {
+  base: string
+  zh: string
+  groupId: string | null // 訓練肌群 id;null = 未支援
+}
+
+// 預先算好每條肌肉的中文名與所屬訓練分類(只算一次)
+const ITEMS: Item[] = MUSCLE_LIST.map((base) => ({
   base,
   zh: muscleNameZh(base) ?? base,
-  supported: resolveMuscle(base) !== null,
-})).sort((a, b) => {
-  // 有支援的排前面,其餘依中文名排序
-  if (a.supported !== b.supported) return a.supported ? -1 : 1
-  return a.zh.localeCompare(b.zh, 'zh-Hant')
-})
+  groupId: resolveMuscle(base)?.id ?? null,
+}))
 
-/** 可搜尋的完整肌肉清單:輸入關鍵字過濾,點名字即選取高亮。 */
+// 依訓練分類分組(MUSCLE_MAP 順序,未支援放最後)
+const GROUPS = [
+  ...MUSCLE_MAP.map((m) => ({
+    id: m.id,
+    label: m.labelZh,
+    items: ITEMS.filter((it) => it.groupId === m.id).sort((a, b) =>
+      a.zh.localeCompare(b.zh, 'zh-Hant'),
+    ),
+  })),
+  {
+    id: 'unsupported',
+    label: '未支援',
+    items: ITEMS.filter((it) => it.groupId === null).sort((a, b) =>
+      a.zh.localeCompare(b.zh, 'zh-Hant'),
+    ),
+  },
+].filter((g) => g.items.length > 0)
+
+function keyOf(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .replace(/\b(left|right)\b/g, '')
+    .replace(/\s*\(\d+\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** 依訓練分類折疊的可搜尋肌肉清單:點開分類才顯示其肌肉,點名字即選取高亮。 */
 export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps) {
   const [query, setQuery] = useState('')
+  const [open, setOpen] = useState<Set<string>>(new Set())
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return ITEMS
-    return ITEMS.filter(
-      (it) => it.zh.toLowerCase().includes(q) || it.base.includes(q),
-    )
-  }, [query])
+  const q = query.trim().toLowerCase()
+  const selectedKey = selectedName ? keyOf(selectedName) : null
+
+  // 搜尋時:過濾各分類的肌肉,並自動展開有結果的分類
+  const groups = useMemo(() => {
+    if (!q) return GROUPS
+    return GROUPS.map((g) => ({
+      ...g,
+      items: g.items.filter(
+        (it) => it.zh.toLowerCase().includes(q) || it.base.includes(q),
+      ),
+    })).filter((g) => g.items.length > 0)
+  }, [q])
+
+  const toggle = (id: string) =>
+    setOpen((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
 
   return (
     <div className="flex h-full w-64 flex-col border-r border-neutral-800 bg-neutral-950/95 text-neutral-200 backdrop-blur">
@@ -54,44 +98,57 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
         </button>
       </div>
 
-      <ul className="flex-1 overflow-y-auto">
-        {filtered.length === 0 && (
-          <li className="p-3 text-sm text-neutral-500">找不到符合的肌肉</li>
+      <div className="flex-1 overflow-y-auto">
+        {groups.length === 0 && (
+          <div className="p-3 text-sm text-neutral-500">找不到符合的肌肉</div>
         )}
-        {filtered.map((it) => {
-          const active = selectedName != null && resolveKey(selectedName) === it.base
+        {groups.map((g) => {
+          const expanded = q !== '' || open.has(g.id)
           return (
-            <li key={it.base}>
+            <div key={g.id} className="border-b border-neutral-800/60">
               <button
                 type="button"
-                onClick={() => onSelect(it.base)}
-                className={
-                  'flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm hover:bg-neutral-800/60 ' +
-                  (active ? 'bg-blue-500/15 text-blue-200' : 'text-neutral-300')
-                }
+                onClick={() => toggle(g.id)}
+                className="flex w-full items-center justify-between px-3 py-2 text-left text-sm font-medium text-neutral-200 hover:bg-neutral-800/50"
               >
-                <span className="truncate">{it.zh}</span>
-                {!it.supported && (
-                  <span className="flex-none text-[10px] text-neutral-600">
-                    未支援
+                <span
+                  className={g.id === 'unsupported' ? 'text-neutral-500' : ''}
+                >
+                  {g.label}
+                  <span className="ml-1.5 text-xs text-neutral-600">
+                    {g.items.length}
                   </span>
-                )}
+                </span>
+                <span className="text-neutral-600">{expanded ? '▲' : '▼'}</span>
               </button>
-            </li>
+
+              {expanded && (
+                <ul className="pb-1">
+                  {g.items.map((it) => {
+                    const active = selectedKey === it.base
+                    return (
+                      <li key={it.base}>
+                        <button
+                          type="button"
+                          onClick={() => onSelect(it.base)}
+                          className={
+                            'block w-full truncate py-1.5 pr-3 pl-6 text-left text-sm hover:bg-neutral-800/60 ' +
+                            (active
+                              ? 'bg-blue-500/15 text-blue-200'
+                              : 'text-neutral-300')
+                          }
+                        >
+                          {it.zh}
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </div>
           )
         })}
-      </ul>
+      </div>
     </div>
   )
-}
-
-/** 把選中的名稱正規化成 MUSCLE_LIST 的基本名,用來標示清單的 active 項目。 */
-function resolveKey(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/_/g, ' ')
-    .replace(/\b(left|right)\b/g, '')
-    .replace(/\s*\(\d+\)/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
 }

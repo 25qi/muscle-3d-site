@@ -205,8 +205,8 @@ function App() {
       {/* Footer 授權標註(CC BY-SA 法律義務,不可省) */}
       <footer className="border-t border-neutral-800 bg-neutral-950 px-4 py-2 text-center text-[11px] leading-relaxed text-neutral-500">
         Anatomy model: BodyParts3D © The Database Center for Life Science (CC
-        BY-SA 2.1 JP) / Z-Anatomy (CC BY-SA 4.0). Exercise data: free-exercise-db
-        (Public Domain).
+        BY-SA 2.1 JP) / Z-Anatomy (CC BY-SA 4.0). Exercise data: ExerciseDB
+        (hasaneyldrm/exercises-dataset, MIT).
       </footer>
     </div>
   )
