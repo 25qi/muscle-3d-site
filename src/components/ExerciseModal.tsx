@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import type { NormalizedExercise } from '../lib/providers'
 import { muscleTermZh } from '../data/muscleTermZh'
 import { useLang, useT, useUiLang } from '../lib/i18n'
+import { lazySteps } from '../lib/langSteps'
 
 interface ExerciseModalProps {
   ex: NormalizedExercise
@@ -39,8 +40,9 @@ export function ExerciseModal({
   const term = (m: string) => (en ? m : muscleTermZh(m))
   const equip = (e: string) => (en ? e : (EQUIP_ZH[e] ?? e))
 
-  // 主要顯示語言的步驟 + 英文步驟(非英文時作對照)
-  const primarySteps = ex.stepsByLang[lang] ?? ex.stepsByLang.en ?? []
+  // 主要顯示語言的步驟(en/zh 內建,其他語言延遲載入)+ 英文步驟對照
+  const primarySteps =
+    ex.stepsByLang[lang] ?? lazySteps(ex.id, lang) ?? ex.stepsByLang.en ?? []
   const enSteps = ex.stepsByLang.en ?? []
   const showEn = lang !== 'en'
 

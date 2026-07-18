@@ -10,6 +10,7 @@ import { muscleName } from './data/muscleNameZh'
 import { resolveMuscle } from './lib/recommend'
 import { useFavorites } from './lib/useFavorites'
 import { LANGS, useLang, useT, useUiLang } from './lib/i18n'
+import { ensureLang } from './lib/langSteps'
 
 interface PickList {
   names: string[]
@@ -122,6 +123,17 @@ function App() {
   const uiLang = useUiLang()
   const t = useT()
   const en = uiLang === 'en'
+  const [, setLangTick] = useState(0)
+  const [langMenuOpen, setLangMenuOpen] = useState(false)
+
+  // 選到其他語言時延遲載入其步驟,載到後 re-render
+  useEffect(() => {
+    let cancelled = false
+    ensureLang(lang).then(() => !cancelled && setLangTick((n) => n + 1))
+    return () => {
+      cancelled = true
+    }
+  }, [lang])
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null)
   const groupRef = useRef<THREE.Group>(null)
@@ -372,18 +384,45 @@ function App() {
 
           {/* 右上:語言切換 + 回正面視角 */}
           <div className="absolute top-4 right-4 flex items-center gap-2">
-            <select
-              value={lang}
-              onChange={(e) => setLang(e.target.value as (typeof LANGS)[number]['code'])}
-              className={`${pill} cursor-pointer px-3 py-2.5 text-sm text-ink-2 hover:text-ink focus:outline-none`}
-              aria-label="Language"
-            >
-              {LANGS.map((l) => (
-                <option key={l.code} value={l.code} className="bg-surface">
-                  {l.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setLangMenuOpen((v) => !v)}
+                className={`${pill} flex items-center gap-1.5 px-3.5 py-2.5 text-sm text-ink-2 hover:text-ink`}
+              >
+                <span>🌐</span>
+                {LANGS.find((l) => l.code === lang)?.label}
+                <span className="text-ink-3">▾</span>
+              </button>
+              {langMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setLangMenuOpen(false)}
+                  />
+                  <div className="absolute top-full right-0 z-40 mt-1 max-h-72 w-40 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1 shadow-2xl backdrop-blur-md">
+                    {LANGS.map((l) => (
+                      <button
+                        key={l.code}
+                        type="button"
+                        onClick={() => {
+                          setLang(l.code)
+                          setLangMenuOpen(false)
+                        }}
+                        className={
+                          'block w-full px-3 py-1.5 text-left text-sm transition-colors hover:bg-accent/10 ' +
+                          (l.code === lang
+                            ? 'font-medium text-accent'
+                            : 'text-ink-2 hover:text-ink')
+                        }
+                      >
+                        {l.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
             <button
               type="button"
               onClick={resetView}
