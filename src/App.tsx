@@ -21,7 +21,12 @@ interface FocusGoal {
   target: THREE.Vector3
 }
 
-/** 平滑把相機移到 goal(面向選中的肌肉並置中);到位後呼叫 onDone。 */
+const FOCUS_DURATION = 0.75 // 秒
+// easeInOutCubic:緩入緩出,起步與收尾都柔和,不會一開始猛衝
+const easeInOut = (u: number) =>
+  u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2
+
+/** 以固定時間 + 緩入緩出把相機移到 goal(面向選中的肌肉並置中);到位後呼叫 onDone。 */
 function FocusAnimator({
   goal,
   controlsRef,
@@ -33,21 +38,28 @@ function FocusAnimator({
   onDone: () => void
 }) {
   const camera = useThree((s) => s.camera)
+  const startPos = useRef(new THREE.Vector3())
+  const startTarget = useRef(new THREE.Vector3())
+  const elapsed = useRef(0)
+  const activeGoal = useRef<FocusGoal | null>(null)
+
   useFrame((_, delta) => {
-    if (!goal) return
     const controls = controlsRef.current
-    if (!controls) return
-    const t = 1 - Math.pow(0.0025, delta) // 幀率無關的指數趨近
-    camera.position.lerp(goal.pos, t)
-    controls.target.lerp(goal.target, t)
+    if (!goal || !controls) return
+    // 新目標 → 記錄起點、歸零計時
+    if (activeGoal.current !== goal) {
+      activeGoal.current = goal
+      startPos.current.copy(camera.position)
+      startTarget.current.copy(controls.target)
+      elapsed.current = 0
+    }
+    elapsed.current = Math.min(elapsed.current + delta, FOCUS_DURATION)
+    const e = easeInOut(elapsed.current / FOCUS_DURATION)
+    camera.position.lerpVectors(startPos.current, goal.pos, e)
+    controls.target.lerpVectors(startTarget.current, goal.target, e)
     controls.update()
-    if (
-      camera.position.distanceTo(goal.pos) < 0.5 &&
-      controls.target.distanceTo(goal.target) < 0.5
-    ) {
-      camera.position.copy(goal.pos)
-      controls.target.copy(goal.target)
-      controls.update()
+    if (elapsed.current >= FOCUS_DURATION) {
+      activeGoal.current = null
       onDone()
     }
   })
@@ -121,6 +133,7 @@ function App() {
     setSelectedName(name)
     setPickList(null)
     setShowFavorites(false)
+    setShowList(false) // 從清單選完就關閉清單,露出置中的肌肉
     const group = groupRef.current
     const controls = controlsRef.current
     if (!group || !controls) return
