@@ -3,7 +3,6 @@
  * 附 GIF 動圖、target/secondary 肌肉。動作選擇較現代。
  */
 import edbData from '../../data/exercisedb.json'
-import { muscleTermZh } from '../../data/muscleTermZh'
 import { exerciseNameZh } from '../../data/exerciseNameZh'
 import type { ExerciseProvider, NormalizedExercise } from './types'
 
@@ -15,8 +14,7 @@ interface RawEdb {
   equipment: string | null
   bodyPart: string
   gif: string
-  steps: string[]
-  stepsZh: string[]
+  steps: Record<string, string[]>
 }
 
 const exercises = edbData as unknown as RawEdb[]
@@ -40,15 +38,14 @@ const TARGETS: Record<string, string[]> = {
   calves: ['calves'],
 }
 
-// 次要肌肉去掉與主要重複的,並轉中文
-function secondaryZh(target: string, secondary: string[]): string[] {
-  const seen = new Set<string>([muscleTermZh(target)])
+// 次要肌肉去掉與主要重複的(保留英文原詞,顯示時再翻譯)
+function dedupeSecondary(target: string, secondary: string[]): string[] {
+  const seen = new Set<string>([target])
   const out: string[] = []
   for (const m of secondary ?? []) {
-    const zh = muscleTermZh(m)
-    if (seen.has(zh)) continue
-    seen.add(zh)
-    out.push(zh)
+    if (seen.has(m)) continue
+    seen.add(m)
+    out.push(m)
   }
   return out
 }
@@ -59,17 +56,15 @@ function normalize(ex: RawEdb, isPrimary: boolean): NormalizedExercise {
     name: ex.name,
     nameZh: exerciseNameZh(ex.name),
     isPrimary,
-    targetMuscle: muscleTermZh(ex.target),
-    secondaryMuscles: secondaryZh(ex.target, ex.secondary),
+    targetMuscle: ex.target,
+    secondaryMuscles: dedupeSecondary(ex.target, ex.secondary),
     equipment: ex.equipment,
-    level: null,
     // 靜態縮圖(images/xxx.jpg)由 GIF 路徑(videos/xxx.gif)推導,不需另存欄位
     imageUrl: ex.gif
       ? GIF_BASE + ex.gif.replace('videos/', 'images/').replace('.gif', '.jpg')
       : null,
     gifUrl: ex.gif ? GIF_BASE + ex.gif : null,
-    steps: ex.steps,
-    stepsZh: ex.stepsZh ?? [],
+    stepsByLang: ex.steps ?? {},
   }
 }
 

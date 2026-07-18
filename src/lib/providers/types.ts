@@ -16,21 +16,17 @@ export interface NormalizedExercise {
   nameZh: string
   /** true = 該肌群是主要目標;false = 輔助 */
   isPrimary: boolean
-  /** 這個動作主要訓練的肌肉(中文) */
+  /** 主要訓練肌肉(英文原詞;顯示時再依語言翻譯) */
   targetMuscle: string
-  /** 這個動作同時訓練到的其他肌肉(中文) */
+  /** 同時訓練到的其他肌肉(英文原詞) */
   secondaryMuscles: string[]
   equipment: string | null
-  /** 難度(有些資料庫沒有 → null) */
-  level: string | null
   /** 靜態縮圖完整網址(清單用,較輕;沒有 → null) */
   imageUrl: string | null
   /** 動圖 GIF 完整網址(全螢幕燈箱用;沒有 → null) */
   gifUrl: string | null
-  /** 動作步驟(英文) */
-  steps: string[]
-  /** 動作步驟(中文,對應 steps 同索引;沒有 → 空陣列) */
-  stepsZh: string[]
+  /** 各語言的動作步驟,key = 語言碼(en/zh/es/…) */
+  stepsByLang: Record<string, string[]>
 }
 
 export interface ExerciseProvider {

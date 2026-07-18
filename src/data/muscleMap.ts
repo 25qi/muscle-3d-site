@@ -130,3 +130,23 @@ export const MUSCLE_MAP: MuscleDef[] = [
     dbMuscles: ['calves'],
   },
 ];
+
+// 12 訓練肌群的英文標籤(介面英文時用;labelZh 為中文)
+const LABEL_EN: Record<string, string> = {
+  chest: 'Chest',
+  lats: 'Lats',
+  traps: 'Traps',
+  shoulders: 'Shoulders',
+  biceps: 'Biceps',
+  triceps: 'Triceps',
+  forearms: 'Forearms',
+  abs: 'Abs',
+  glutes: 'Glutes',
+  quads: 'Quads',
+  hamstrings: 'Hamstrings',
+  calves: 'Calves',
+}
+
+/** 依介面語言取肌群標籤(en=true → 英文,否則中文) */
+export const groupLabel = (m: MuscleDef, en: boolean): string =>
+  en ? (LABEL_EN[m.id] ?? m.id) : m.labelZh

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { MuscleDef } from '../data/muscleMap'
-import { muscleNameZh } from '../data/muscleNameZh'
+import { type MuscleDef, groupLabel } from '../data/muscleMap'
+import { muscleNameEn, muscleNameZh } from '../data/muscleNameZh'
+import { muscleTermZh } from '../data/muscleTermZh'
 import { PROVIDERS, type NormalizedExercise } from '../lib/providers'
+import { useT, useUiLang } from '../lib/i18n'
 import { ExerciseModal } from './ExerciseModal'
 
 interface PanelProps {
@@ -57,6 +59,10 @@ function ExerciseCard({
   onToggleFav: () => void
   onOpen: () => void
 }) {
+  const t = useT()
+  const en = useUiLang() === 'en'
+  const term = (m: string) => (en ? m : muscleTermZh(m))
+  const sep = en ? ', ' : '、'
   return (
     <li className="overflow-hidden rounded-xl border border-line bg-surface-2 transition-colors hover:border-ink-3/40">
       <div className="flex items-center gap-2 p-2.5">
@@ -74,16 +80,20 @@ function ExerciseCard({
             />
           )}
           <div className="min-w-0 flex-1">
-            <div className="font-medium text-ink">{ex.nameZh}</div>
-            <div className="truncate text-xs text-ink-3 capitalize">
-              {ex.name}
+            <div className="font-medium text-ink capitalize">
+              {en ? ex.name : ex.nameZh}
             </div>
+            {!en && (
+              <div className="truncate text-xs text-ink-3 capitalize">
+                {ex.name}
+              </div>
+            )}
             <div className="mt-1 truncate text-xs">
-              <span className="text-ink-2">{ex.targetMuscle}</span>
+              <span className="text-ink-2">{term(ex.targetMuscle)}</span>
               {ex.secondaryMuscles.length > 0 && (
                 <span className="text-ink-3">
-                  {' · '}
-                  {ex.secondaryMuscles.join('、')}
+                  {en ? ' · ' : ' · '}
+                  {ex.secondaryMuscles.map(term).join(sep)}
                 </span>
               )}
             </div>
@@ -95,11 +105,11 @@ function ExerciseCard({
                     : 'rounded-md bg-line/60 px-1.5 py-0.5 text-ink-3'
                 }
               >
-                {ex.isPrimary ? '主要' : '輔助'}
+                {ex.isPrimary ? t('primary') : t('secondary')}
               </span>
               {ex.equipment && (
                 <span className="rounded-md bg-line/60 px-1.5 py-0.5 text-ink-2">
-                  {equipZh(ex.equipment)}
+                  {en ? ex.equipment : equipZh(ex.equipment)}
                 </span>
               )}
             </div>
@@ -109,7 +119,7 @@ function ExerciseCard({
         <button
           type="button"
           onClick={onToggleFav}
-          aria-label={favorited ? '移除最愛' : '加入最愛'}
+          aria-label={favorited ? t('removeFav') : t('addFav')}
           className={
             'flex-none px-1 text-lg leading-none transition-colors ' +
             (favorited ? 'text-warn' : 'text-ink-3 hover:text-warn')
@@ -134,6 +144,8 @@ export function Panel({
   const [primaryOnly, setPrimaryOnly] = useState(false)
   const [favOnly, setFavOnly] = useState(false)
   const [equip, setEquip] = useState<string | null>(null)
+  const t = useT()
+  const en = useUiLang() === 'en'
 
   const isFav = (id: string) => favorites.has(id)
 
@@ -185,12 +197,17 @@ export function Panel({
     const items = [...favorites]
       .map((id) => provider.byId(id))
       .filter((e): e is NormalizedExercise => e !== null)
-    // 依「主要訓練肌肉」分組(保留加入順序)
-    const groups: { label: string; items: NormalizedExercise[] }[] = []
+    // 依「主要訓練肌肉」分組(保留加入順序);label 依語言在地化
+    const groups: { key: string; label: string; items: NormalizedExercise[] }[] =
+      []
     for (const ex of items) {
-      let g = groups.find((x) => x.label === ex.targetMuscle)
+      let g = groups.find((x) => x.key === ex.targetMuscle)
       if (!g) {
-        g = { label: ex.targetMuscle, items: [] }
+        g = {
+          key: ex.targetMuscle,
+          label: en ? ex.targetMuscle : muscleTermZh(ex.targetMuscle),
+          items: [],
+        }
         groups.push(g)
       }
       g.items.push(ex)
@@ -202,17 +219,17 @@ export function Panel({
         <div className="flex items-center justify-between border-b border-line p-5">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight text-ink">
-              我的最愛
+              {t('favorites')}
             </h2>
             <div className="mt-0.5 text-xs text-ink-3">
-              {items.length} 個收藏動作
+              {items.length} {t('savedCount')}
             </div>
           </div>
           <button
             type="button"
             onClick={onCloseFavorites}
             className="rounded-lg px-2 py-1.5 text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
-            aria-label="關閉"
+            aria-label={t('close')}
           >
             ✕
           </button>
@@ -222,13 +239,13 @@ export function Panel({
           <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
             <div className="text-3xl text-ink-3">☆</div>
             <p className="max-w-[16rem] text-sm leading-relaxed text-ink-2">
-              還沒有收藏。點任何動作卡右側的 ☆ 就能加入,收藏會留在這個瀏覽器。
+              {t('favEmpty')}
             </p>
           </div>
         ) : (
           <div className="flex-1 space-y-5 overflow-y-auto p-4">
             {groups.map((g) => (
-              <div key={g.label}>
+              <div key={g.key}>
                 <div className="mb-2 px-1 text-xs font-medium tracking-wide text-ink-3">
                   {g.label}
                   <span className="ml-1.5 text-ink-3/70">{g.items.length}</span>
@@ -260,25 +277,22 @@ export function Panel({
           ✛
         </div>
         <div className="space-y-1.5">
-          <h3 className="text-lg font-semibold text-ink">開始探索肌肉群</h3>
+          <h3 className="text-lg font-semibold text-ink">{t('exploreTitle')}</h3>
           <p className="mx-auto max-w-[16rem] text-sm leading-relaxed text-ink-2">
-            選一塊肌肉,立刻看到最適合訓練它的動作、器材與分解步驟。
+            {t('exploreBody')}
           </p>
         </div>
-        <p className="flex items-center gap-1.5 text-xs text-ink-3">
-          <span className="text-base">←</span>
-          旋轉、點選左側的 3D 模型,或用左上的「肌肉清單」搜尋
+        <p className="max-w-[18rem] text-xs leading-relaxed text-ink-3">
+          {t('exploreHint')}
         </p>
       </div>
     )
   }
 
-  const nameZh = muscleNameZh(meshName) ?? meshName
-  const nameEn = meshName
-    .replace(/_/g, ' ')
-    .replace(/\b(left|right)\b/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
+  const primaryName = en
+    ? muscleNameEn(meshName)
+    : (muscleNameZh(meshName) ?? meshName)
+  const secondaryName = en ? null : muscleNameEn(meshName)
 
   const chip = (active: boolean) =>
     'rounded-full px-2.5 py-1 text-xs font-medium transition-colors ' +
@@ -290,19 +304,21 @@ export function Panel({
     <div className="flex h-full flex-col">
       {modal}
       <div className="border-b border-line p-5">
-        <h2 className="text-2xl font-semibold tracking-tight text-ink">
-          {nameZh}
+        <h2 className="text-2xl font-semibold tracking-tight text-ink capitalize">
+          {primaryName}
         </h2>
-        <div className="mt-0.5 text-xs tracking-wide text-ink-3 capitalize">
-          {nameEn}
-        </div>
+        {secondaryName && (
+          <div className="mt-0.5 text-xs tracking-wide text-ink-3 capitalize">
+            {secondaryName}
+          </div>
+        )}
 
         {muscle ? (
           <>
             <div className="mt-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-sm font-medium text-accent">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-                {muscle.labelZh}
+                {groupLabel(muscle, en)}
               </span>
             </div>
 
@@ -312,14 +328,14 @@ export function Panel({
                 onClick={() => setFavOnly((v) => !v)}
                 className={chip(favOnly)}
               >
-                ★ 只看最愛
+                ★ {t('favOnly')}
               </button>
               <button
                 type="button"
                 onClick={() => setPrimaryOnly((v) => !v)}
                 className={chip(primaryOnly)}
               >
-                只看主要
+                {t('primaryOnly')}
               </button>
               {equipOptions.map((e) => (
                 <button
@@ -328,7 +344,7 @@ export function Panel({
                   onClick={() => setEquip((cur) => (cur === e ? null : e))}
                   className={chip(equip === e)}
                 >
-                  {equipZh(e)}
+                  {en ? e : equipZh(e)}
                 </button>
               ))}
             </div>
@@ -336,7 +352,7 @@ export function Panel({
         ) : (
           <div className="mt-3">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-warn/15 px-3 py-1 text-sm font-medium text-warn">
-              尚未支援
+              {t('notSupportedYet')}
             </span>
           </div>
         )}
@@ -344,21 +360,21 @@ export function Panel({
 
       {!muscle ? (
         <div className="flex-1 p-5 text-sm leading-relaxed text-ink-3">
-          這塊肌肉不在目前支援的 12 個訓練肌群內,因此沒有推薦動作。你仍可從左側清單瀏覽其他肌肉。
+          {t('notSupportedBody')}
         </div>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex items-center justify-between px-5 pt-3 pb-1 text-xs text-ink-3">
             <span>
               <span className="tabular-nums text-ink-2">{exercises.length}</span>{' '}
-              / {all.length} 個動作
+              / {all.length} {t('exercisesUnit')}
             </span>
             <span>{provider.label}</span>
           </div>
           <ul className="flex-1 space-y-2 overflow-y-auto px-4 pt-1 pb-4">
             {exercises.length === 0 && (
               <li className="px-1 py-6 text-center text-sm text-ink-3">
-                沒有符合篩選的動作
+                {t('noMatch')}
               </li>
             )}
             {exercises.map((ex) => (

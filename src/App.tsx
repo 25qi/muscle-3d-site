@@ -6,9 +6,10 @@ import { AnatomyModel, symmetryKey } from './components/AnatomyModel'
 import { Loader } from './components/Loader'
 import { Panel } from './components/Panel'
 import { MuscleList } from './components/MuscleList'
-import { muscleNameZh } from './data/muscleNameZh'
+import { muscleName } from './data/muscleNameZh'
 import { resolveMuscle } from './lib/recommend'
 import { useFavorites } from './lib/useFavorites'
+import { LANGS, useLang, useT, useUiLang } from './lib/i18n'
 
 interface PickList {
   names: string[]
@@ -117,6 +118,10 @@ function App() {
   const [focusGoal, setFocusGoal] = useState<FocusGoal | null>(null) // 鏡頭要平滑移到的目標
   const [showFavorites, setShowFavorites] = useState(false) // 是否顯示「我的最愛」
   const { favorites, toggle: toggleFav } = useFavorites()
+  const { lang, setLang } = useLang()
+  const uiLang = useUiLang()
+  const t = useT()
+  const en = uiLang === 'en'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null)
   const groupRef = useRef<THREE.Group>(null)
@@ -262,9 +267,10 @@ function App() {
       setToast(null)
       return
     }
-    setToast('這塊肌肉尚未支援')
-    const t = setTimeout(() => setToast(null), 2000)
-    return () => clearTimeout(t)
+    setToast(t('notSupportedToast'))
+    const timer = setTimeout(() => setToast(null), 2000)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedName, muscle])
 
   const pill =
@@ -287,7 +293,7 @@ function App() {
             <directionalLight position={[-400, 400, -800]} intensity={0.9} />
             <directionalLight position={[-700, 100, 300]} intensity={0.35} />
 
-            <Suspense fallback={<Loader />}>
+            <Suspense fallback={<Loader label={t('loading')} />}>
               {/* GLB 原始為 Z-up,轉成 Y-up 讓人體站直、正面朝鏡頭 */}
               <group ref={groupRef} rotation={[-Math.PI / 2, 0, 0]}>
                 <AnatomyModel
@@ -328,7 +334,7 @@ function App() {
                 onClick={() => setShowList(true)}
                 className={`${pill} flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink-2 hover:text-ink`}
               >
-                <span className="text-base text-accent">☰</span> 肌肉清單
+                <span className="text-base text-accent">☰</span> {t('muscles')}
               </button>
               <button
                 type="button"
@@ -337,7 +343,7 @@ function App() {
                   showFavorites ? 'text-warn' : 'text-ink-2 hover:text-ink'
                 }`}
               >
-                <span className="text-base text-warn">★</span> 我的最愛
+                <span className="text-base text-warn">★</span> {t('favorites')}
                 {favorites.size > 0 && (
                   <span className="tabular-nums text-ink-3">
                     {favorites.size}
@@ -347,7 +353,7 @@ function App() {
               <div
                 className={`${pill} flex items-center gap-3 px-3.5 py-2.5 text-sm text-ink-2`}
               >
-                <span className="whitespace-nowrap">透明度</span>
+                <span className="whitespace-nowrap">{t('opacity')}</span>
                 <input
                   type="range"
                   min={0.15}
@@ -364,19 +370,33 @@ function App() {
             </div>
           )}
 
-          {/* 回原始位置 */}
-          <button
-            type="button"
-            onClick={resetView}
-            className={`${pill} absolute top-4 right-4 flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink-2 hover:text-ink`}
-          >
-            <span className="text-base">⟲</span> 回正面視角
-          </button>
+          {/* 右上:語言切換 + 回正面視角 */}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <select
+              value={lang}
+              onChange={(e) => setLang(e.target.value as (typeof LANGS)[number]['code'])}
+              className={`${pill} cursor-pointer px-3 py-2.5 text-sm text-ink-2 hover:text-ink focus:outline-none`}
+              aria-label="Language"
+            >
+              {LANGS.map((l) => (
+                <option key={l.code} value={l.code} className="bg-surface">
+                  {l.label}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={resetView}
+              className={`${pill} flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink-2 hover:text-ink`}
+            >
+              <span className="text-base">⟲</span> {t('resetView')}
+            </button>
+          </div>
 
           {/* 品牌浮水印 */}
           <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-2 text-xs text-ink-3">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-            肌肉圖鑑 · 3D Muscle Explorer
+            {t('brand')}
           </div>
 
           {/* ④ 可搜尋肌肉清單(左側浮層) */}
@@ -411,7 +431,9 @@ function App() {
                     style={{ left, top }}
                   >
                     <div className="px-3 py-1 text-[11px] text-ink-3">
-                      這裡有 {pickList.names.length} 塊重疊肌肉 你想選擇的是？
+                      {en
+                        ? `${pickList.names.length} ${t('overlapHere')}`
+                        : `這裡有 ${pickList.names.length} ${t('overlapHere')}`}
                     </div>
                     {pickList.names.map((name) => {
                       const supported = resolveMuscle(name) !== null
@@ -435,11 +457,11 @@ function App() {
                                   : 'text-ink-3'
                             }
                           >
-                            {muscleNameZh(name) ?? name}
+                            {muscleName(name, en)}
                           </span>
                           {!supported && (
                             <span className="flex-none text-[10px] text-ink-3">
-                              未支援
+                              {t('unsupported')}
                             </span>
                           )}
                         </button>

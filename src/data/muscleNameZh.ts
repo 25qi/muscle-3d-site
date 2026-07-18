@@ -265,6 +265,20 @@ const BASE_NAMES: [string, string][] = [
  * Return the Traditional Chinese name for a mesh, or null if unknown.
  * e.g. "long head of left biceps brachii" -> "肱二頭肌(長頭)"
  */
+/** 英文肌肉名:把底線換空格、去掉 left/right(介面英文時用) */
+export function muscleNameEn(meshName: string): string {
+  return meshName
+    .replace(/_/g, ' ')
+    .replace(/\b(left|right)\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** 依介面語言取肌肉名(en=true → 英文,否則中文) */
+export function muscleName(meshName: string, en: boolean): string {
+  return en ? muscleNameEn(meshName) : (muscleNameZh(meshName) ?? muscleNameEn(meshName))
+}
+
 export function muscleNameZh(meshName: string): string | null {
   // three.js 載入時會把名字空格換成底線,比對前先換回空格
   const n = meshName.toLowerCase().replace(/_/g, ' ')

@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { MUSCLE_LIST } from '../data/muscleList'
-import { MUSCLE_MAP } from '../data/muscleMap'
-import { muscleNameZh } from '../data/muscleNameZh'
+import { MUSCLE_MAP, groupLabel } from '../data/muscleMap'
+import { muscleNameEn, muscleNameZh } from '../data/muscleNameZh'
 import { resolveMuscle } from '../lib/recommend'
+import { useT, useUiLang } from '../lib/i18n'
 
 interface MuscleListProps {
   selectedName: string | null
@@ -13,33 +14,17 @@ interface MuscleListProps {
 interface Item {
   base: string
   zh: string
+  en: string
   groupId: string | null // 訓練肌群 id;null = 未支援
 }
 
-// 預先算好每條肌肉的中文名與所屬訓練分類(只算一次)
+// 預先算好每條肌肉的中英名與所屬訓練分類(只算一次)
 const ITEMS: Item[] = MUSCLE_LIST.map((base) => ({
   base,
   zh: muscleNameZh(base) ?? base,
+  en: muscleNameEn(base),
   groupId: resolveMuscle(base)?.id ?? null,
 }))
-
-// 依訓練分類分組(MUSCLE_MAP 順序,未支援放最後)
-const GROUPS = [
-  ...MUSCLE_MAP.map((m) => ({
-    id: m.id,
-    label: m.labelZh,
-    items: ITEMS.filter((it) => it.groupId === m.id).sort((a, b) =>
-      a.zh.localeCompare(b.zh, 'zh-Hant'),
-    ),
-  })),
-  {
-    id: 'unsupported',
-    label: '未支援',
-    items: ITEMS.filter((it) => it.groupId === null).sort((a, b) =>
-      a.zh.localeCompare(b.zh, 'zh-Hant'),
-    ),
-  },
-].filter((g) => g.items.length > 0)
 
 function keyOf(name: string): string {
   return name
@@ -55,20 +40,45 @@ function keyOf(name: string): string {
 export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState<Set<string>>(new Set())
+  const t = useT()
+  const uiLang = useUiLang()
+  const en = uiLang === 'en'
+  const nameOf = (it: Item) => (en ? it.en : it.zh)
 
   const q = query.trim().toLowerCase()
   const selectedKey = selectedName ? keyOf(selectedName) : null
 
-  // 搜尋時:過濾各分類的肌肉,並自動展開有結果的分類
+  // 依語言分組、過濾、排序(未支援放最後)
   const groups = useMemo(() => {
-    if (!q) return GROUPS
-    return GROUPS.map((g) => ({
-      ...g,
-      items: g.items.filter(
-        (it) => it.zh.toLowerCase().includes(q) || it.base.includes(q),
-      ),
-    })).filter((g) => g.items.length > 0)
-  }, [q])
+    const all = [
+      ...MUSCLE_MAP.map((m) => ({
+        id: m.id,
+        label: groupLabel(m, en),
+        items: ITEMS.filter((it) => it.groupId === m.id),
+      })),
+      {
+        id: 'unsupported',
+        label: t('unsupported'),
+        items: ITEMS.filter((it) => it.groupId === null),
+      },
+    ]
+    return all
+      .map((g) => ({
+        ...g,
+        items: g.items
+          .filter(
+            (it) =>
+              !q ||
+              (en ? it.en : it.zh).toLowerCase().includes(q) ||
+              it.base.includes(q),
+          )
+          .sort((a, b) =>
+            (en ? a.en : a.zh).localeCompare(en ? b.en : b.zh, en ? 'en' : 'zh-Hant'),
+          ),
+      }))
+      .filter((g) => g.items.length > 0)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, en])
 
   const toggle = (id: string) =>
     setOpen((prev) => {
@@ -85,14 +95,14 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
           autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="搜尋肌肉(中/英)"
+          placeholder={t('searchMuscles')}
           className="min-w-0 flex-1 rounded-lg border border-line bg-ground px-2.5 py-2 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-accent/60"
         />
         <button
           type="button"
           onClick={onClose}
           className="flex-none rounded-lg px-2 py-1.5 text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
-          aria-label="關閉清單"
+          aria-label={t('close')}
         >
           ✕
         </button>
@@ -100,7 +110,7 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
 
       <div className="flex-1 overflow-y-auto">
         {groups.length === 0 && (
-          <div className="p-4 text-sm text-ink-3">找不到符合的肌肉</div>
+          <div className="p-4 text-sm text-ink-3">{t('noMuscles')}</div>
         )}
         {groups.map((g) => {
           const expanded = q !== '' || open.has(g.id)
@@ -150,7 +160,7 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
                               : 'border-transparent text-ink-2 hover:bg-surface-2 hover:text-ink')
                           }
                         >
-                          {it.zh}
+                          {nameOf(it)}
                         </button>
                       </li>
                     )
