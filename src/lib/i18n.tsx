@@ -1,17 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
-/** 動作步驟支援的語言(資料庫有資料) */
-export type Lang =
-  | 'en'
-  | 'zh'
-  | 'es'
-  | 'fr'
-  | 'it'
-  | 'ru'
-  | 'hi'
-  | 'pl'
-  | 'ko'
-  | 'tr'
+/** 提供的語言(繁中/英 + 有翻譯把握的歐語) */
+export type Lang = 'en' | 'zh' | 'es' | 'fr' | 'it' | 'pl' | 'tr'
 
 /** 介面/肌肉名只有中英兩版:中文選中文,其餘一律英文 */
 export type UiLang = 'en' | 'zh'
@@ -24,10 +14,7 @@ export const LANGS: { code: Lang; label: string }[] = [
   { code: 'es', label: 'Español' },
   { code: 'fr', label: 'Français' },
   { code: 'it', label: 'Italiano' },
-  { code: 'ru', label: 'Русский' },
-  { code: 'hi', label: 'हिन्दी' },
   { code: 'pl', label: 'Polski' },
-  { code: 'ko', label: '한국어' },
   { code: 'tr', label: 'Türkçe' },
 ]
 
