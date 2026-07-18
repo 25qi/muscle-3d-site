@@ -15,8 +15,11 @@ interface AnatomyModelProps {
   selectedName: string | null
   /** 全域肌肉透明度(1 = 不透明);選中的肌肉一律維持不透明 */
   opacity: number
-  /** 使用者點選某塊 mesh 時回呼其名稱 */
-  onSelect: (meshName: string) => void
+  /**
+   * 點擊時回呼「游標下的重疊肌肉(依深度去重排序)」與螢幕座標。
+   * 只有一塊時 App 直接選;多塊時 App 跳清單讓使用者挑。
+   */
+  onPick: (meshNames: string[], clientX: number, clientY: number) => void
 }
 
 /** 從被 raycast 命中的物件取得它的解剖名稱(名字在 mesh 或其父節點上)。 */
@@ -46,7 +49,7 @@ function symmetryKey(name: string): string {
 export function AnatomyModel({
   selectedName,
   opacity,
-  onSelect,
+  onPick,
 }: AnatomyModelProps) {
   const { scene } = useGLTF(MODEL_URL)
   const downPos = useRef<{ x: number; y: number } | null>(null)
@@ -93,9 +96,19 @@ export function AnatomyModel({
     downPos.current = null
     // 位移過大 = 使用者在旋轉,不算點選
     if (Math.hypot(dx, dy) > CLICK_THRESHOLD_PX) return
-    e.stopPropagation() // 只讓最前面那塊 mesh 觸發
-    const name = meshNameOf(e.object)
-    if (name) onSelect(name)
+    e.stopPropagation()
+    // 收集游標下所有重疊肌肉,依深度排序後用對稱鍵去重(左右視為同一塊)
+    const seen = new Set<string>()
+    const names: string[] = []
+    for (const hit of e.intersections) {
+      const name = meshNameOf(hit.object)
+      if (!name) continue
+      const key = symmetryKey(name)
+      if (seen.has(key)) continue
+      seen.add(key)
+      names.push(name)
+    }
+    if (names.length > 0) onPick(names, e.clientX, e.clientY)
   }
 
   return (

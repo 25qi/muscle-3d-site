@@ -5,15 +5,36 @@ import * as THREE from 'three'
 import { AnatomyModel } from './components/AnatomyModel'
 import { Loader } from './components/Loader'
 import { Panel } from './components/Panel'
+import { MuscleList } from './components/MuscleList'
+import { muscleNameZh } from './data/muscleNameZh'
 import { resolveMuscle } from './lib/recommend'
+
+interface PickList {
+  names: string[]
+  x: number
+  y: number
+}
 
 function App() {
   const [selectedName, setSelectedName] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [opacity, setOpacity] = useState(1) // 肌肉透明度(1 = 不透明)
+  const [showList, setShowList] = useState(false) // 是否顯示可搜尋肌肉清單
+  const [pickList, setPickList] = useState<PickList | null>(null) // 游標下多塊重疊時的挑選清單
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const controlsRef = useRef<any>(null)
   const groupRef = useRef<THREE.Group>(null)
+
+  const selectMuscle = (name: string) => {
+    setSelectedName(name)
+    setPickList(null)
+  }
+
+  // 點擊 3D:只有一塊直接選;多塊重疊則跳清單讓使用者挑
+  const handlePick = (names: string[], x: number, y: number) => {
+    if (names.length === 1) selectMuscle(names[0])
+    else setPickList({ names, x, y })
+  }
 
   // 回正面視角:依模型實際包圍盒中心對準,正面水平框好(不會從腳往上看)
   const resetView = () => {
@@ -74,7 +95,7 @@ function App() {
                   <AnatomyModel
                     selectedName={selectedName}
                     opacity={opacity}
-                    onSelect={setSelectedName}
+                    onPick={handlePick}
                   />
                 </group>
               </Bounds>
@@ -92,22 +113,33 @@ function App() {
             />
           </Canvas>
 
-          {/* 透明度滑桿:調低可透視、看到深層肌肉 */}
-          <div className="absolute top-4 left-4 flex items-center gap-2 rounded-lg bg-neutral-800/80 px-3 py-2 text-xs text-neutral-300 backdrop-blur">
-            <span className="whitespace-nowrap">肌肉透明度</span>
-            <input
-              type="range"
-              min={0.15}
-              max={1}
-              step={0.05}
-              value={opacity}
-              onChange={(e) => setOpacity(Number(e.target.value))}
-              className="w-28 accent-blue-400"
-            />
-            <span className="w-8 tabular-nums text-neutral-400">
-              {Math.round(opacity * 100)}%
-            </span>
-          </div>
+          {/* 左上控制列:肌肉清單開關 + 透明度滑桿 */}
+          {!showList && (
+            <div className="absolute top-4 left-4 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowList(true)}
+                className="rounded-lg bg-neutral-800/80 px-3 py-2 text-xs text-neutral-200 backdrop-blur hover:bg-neutral-700/80"
+              >
+                ☰ 肌肉清單
+              </button>
+              <div className="flex items-center gap-2 rounded-lg bg-neutral-800/80 px-3 py-2 text-xs text-neutral-300 backdrop-blur">
+                <span className="whitespace-nowrap">透明度</span>
+                <input
+                  type="range"
+                  min={0.15}
+                  max={1}
+                  step={0.05}
+                  value={opacity}
+                  onChange={(e) => setOpacity(Number(e.target.value))}
+                  className="w-24 accent-blue-400"
+                />
+                <span className="w-8 tabular-nums text-neutral-400">
+                  {Math.round(opacity * 100)}%
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* 回原始位置 */}
           <button
@@ -117,6 +149,45 @@ function App() {
           >
             回正面視角
           </button>
+
+          {/* ④ 可搜尋肌肉清單(左側浮層) */}
+          {showList && (
+            <div className="absolute inset-y-0 left-0 z-20">
+              <MuscleList
+                selectedName={selectedName}
+                onSelect={selectMuscle}
+                onClose={() => setShowList(false)}
+              />
+            </div>
+          )}
+
+          {/* ② 游標下重疊肌肉的挑選清單 */}
+          {pickList && (
+            <>
+              <div
+                className="fixed inset-0 z-30"
+                onClick={() => setPickList(null)}
+              />
+              <div
+                className="fixed z-40 max-h-64 w-52 overflow-y-auto rounded-lg border border-neutral-700 bg-neutral-900/95 py-1 text-sm shadow-xl backdrop-blur"
+                style={{ left: pickList.x + 4, top: pickList.y + 4 }}
+              >
+                <div className="px-3 py-1 text-[11px] text-neutral-500">
+                  這裡有 {pickList.names.length} 塊重疊肌肉
+                </div>
+                {pickList.names.map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => selectMuscle(name)}
+                    className="block w-full px-3 py-1.5 text-left text-neutral-200 hover:bg-neutral-800"
+                  >
+                    {muscleNameZh(name) ?? name}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
 
           {toast && (
             <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-neutral-800/90 px-4 py-2 text-sm text-amber-300 shadow-lg">
