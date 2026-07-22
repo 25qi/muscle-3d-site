@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import type { NormalizedExercise } from '../lib/providers'
 import { muscleTerm } from '../data/muscleTerms'
 import { useLang, useT, useUiLang } from '../lib/i18n'
@@ -59,7 +60,8 @@ export function ExerciseModal({
     }
   }, [onClose])
 
-  return (
+  // 用 portal 掛到 body:面板有 backdrop-filter,會讓內部的 fixed 元素被侷限、裁切
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
       onClick={onClose}
@@ -145,6 +147,7 @@ export function ExerciseModal({
           ✕
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

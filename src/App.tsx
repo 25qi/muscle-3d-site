@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { Bloom, EffectComposer } from '@react-three/postprocessing'
@@ -259,8 +260,12 @@ function App() {
     return c
   }
 
-  // 回正面視角:左右旋轉樞紐用「重心 XZ」(才會原地旋轉),Y 用包圍盒中心(畫面置中)
-  const resetView = () => {
+  /**
+   * 回正面視角。animate=true → 走 FocusAnimator 的緩入緩出(跟清單選肌肉一致);
+   * animate=false → 直接就位(初次載入用,避免從奇怪位置飛過來)。
+   * 旋轉樞紐:XZ 取重心(才會原地旋轉),Y 取包圍盒中心(畫面垂直置中)。
+   */
+  const resetView = (animate = true) => {
     const group = groupRef.current
     const controls = controlsRef.current
     if (!group || !controls) return
@@ -268,16 +273,21 @@ function App() {
     const bboxC = box.getCenter(new THREE.Vector3())
     const size = box.getSize(new THREE.Vector3())
     const cen = getCentroid(group)
-    // 旋轉樞紐:XZ 取重心(消除左右旋轉的小圓漂移),Y 取包圍盒中心(維持垂直置中)
     const target = new THREE.Vector3(cen.x, bboxC.y, cen.z)
     const cam = controls.object as THREE.PerspectiveCamera
     const fov = (cam.fov * Math.PI) / 180
     // 依身高/身寬算出剛好框滿的距離,再留一點邊界
     const dist = (Math.max(size.y, size.x) / 2 / Math.tan(fov / 2)) * 1.3
-    cam.position.set(target.x, target.y, target.z + dist)
-    controls.target.copy(target)
-    // 鎖住縮小上限:最遠只能拉到「正面視角」的距離,不能再滾更小
+    // 鎖住縮小上限:最遠只能拉到「正面視角」的距離
     controls.maxDistance = dist
+    const pos = new THREE.Vector3(target.x, target.y, target.z + dist)
+
+    if (animate) {
+      setFocusGoal({ pos, target })
+      return
+    }
+    cam.position.copy(pos)
+    controls.target.copy(target)
     controls.update()
   }
 
@@ -382,10 +392,14 @@ function App() {
             </button>
             {langMenuOpen && (
               <>
-                <div
-                  className="fixed inset-0 z-30"
-                  onClick={() => setLangMenuOpen(false)}
-                />
+                {/* 遮罩 portal 到 body:header 有 backdrop-filter,fixed 會被侷限在 header 內 */}
+                {createPortal(
+                  <div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setLangMenuOpen(false)}
+                  />,
+                  document.body,
+                )}
                 <div className="absolute top-full right-0 z-40 mt-1 max-h-72 w-40 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1 shadow-2xl backdrop-blur-md">
                   {LANGS.map((l) => (
                     <button
@@ -412,7 +426,7 @@ function App() {
 
           <button
             type="button"
-            onClick={resetView}
+            onClick={() => resetView(true)}
             className={`${headerBtn} text-ink-2 hover:text-ink`}
           >
             <IconReset />
@@ -443,7 +457,7 @@ function App() {
                   selectedName={selectedName}
                   opacity={opacity}
                   onPick={handlePick}
-                  onReady={resetView}
+                  onReady={() => resetView(false)}
                 />
               </group>
             </Suspense>
