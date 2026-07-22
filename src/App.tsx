@@ -79,6 +79,65 @@ function FocusAnimator({
   return null
 }
 
+/** 開場:自轉一圈 + 依序點亮代表性肌肉的總時長(秒) */
+const INTRO_DURATION = 3
+/**
+ * 開場輪流點亮的肌肉(小寫片段,比對 mesh 名)。
+ * 順序刻意跟著鏡頭轉動:前 → 側 → 背 → 轉回正面。
+ */
+const INTRO_FLASH = [
+  'pectoralis major',
+  'rectus abdominis',
+  'deltoid',
+  'latissimus dorsi',
+  'gluteus maximus',
+  'biceps brachii',
+]
+
+/**
+ * 開場運鏡:以 controls.target 為軸心,把相機繞行完整一圈(方位角 +2π)。
+ * 繞的是相機而非模型,才會真的原地自轉 —— 直接轉 group 會繞到模型原點
+ * (與視覺重心差約 15 單位),看起來像在畫小圓。轉滿一圈後回到原位。
+ */
+function IntroSpin({
+  active,
+  controlsRef,
+  onDone,
+}: {
+  active: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  controlsRef: React.RefObject<any>
+  onDone: () => void
+}) {
+  const camera = useThree((s) => s.camera)
+  const startSph = useRef<THREE.Spherical | null>(null)
+  const elapsed = useRef(0)
+
+  useFrame((_, delta) => {
+    const controls = controlsRef.current
+    if (!active || !controls) return
+    if (!startSph.current) {
+      const offset = new THREE.Vector3().subVectors(
+        camera.position,
+        controls.target,
+      )
+      startSph.current = new THREE.Spherical().setFromVector3(offset)
+      elapsed.current = 0
+    }
+    elapsed.current = Math.min(elapsed.current + delta, INTRO_DURATION)
+    const sph = startSph.current.clone()
+    sph.theta += easeInOut(elapsed.current / INTRO_DURATION) * Math.PI * 2
+    camera.position.setFromSpherical(sph).add(controls.target)
+    camera.lookAt(controls.target)
+    controls.update()
+    if (elapsed.current >= INTRO_DURATION) {
+      startSph.current = null
+      onDone()
+    }
+  })
+  return null
+}
+
 /**
  * 情境式拖曳:按下時判斷游標下有沒有模型。
  * 有 → 左鍵/單指=旋轉;沒有(空白處)→ 平移。
@@ -131,6 +190,10 @@ function App() {
   const [showFavorites, setShowFavorites] = useState(false) // 是否顯示「我的最愛」
   const [showFeedback, setShowFeedback] = useState(false) // 是否顯示留言板
   const [modelReady, setModelReady] = useState(false) // 模型載入完成 → 收起啟動畫面
+  // 開場動畫:啟動畫面收完 → intro 期間轉一圈並輪流點亮肌肉 → 結束後才浮出四塊面板
+  const [intro, setIntro] = useState(false)
+  const [introDone, setIntroDone] = useState(false)
+  const [flashIndex, setFlashIndex] = useState(0)
   const { favorites, toggle: toggleFav } = useFavorites()
   // 肌肉收藏(存去左右的基本名,如 "gluteus maximus")
   const { favorites: favMuscles, toggle: toggleFavMuscle } = useFavorites(
@@ -324,13 +387,48 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedName, muscle])
 
+  // 開場期間每隔一段時間換下一塊肌肉,轉一圈剛好輪完一輪
+  useEffect(() => {
+    if (!intro) return
+    const step = (INTRO_DURATION * 1000) / INTRO_FLASH.length
+    const timer = setInterval(
+      () => setFlashIndex((i) => Math.min(i + 1, INTRO_FLASH.length - 1)),
+      step,
+    )
+    return () => clearInterval(timer)
+  }, [intro])
+
+  /** 啟動畫面收完的接手點:開場動畫是純裝飾,使用者要求減少動態就直接跳過。 */
+  const startIntro = () => {
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+      .matches
+    if (reduce) {
+      setIntroDone(true)
+      return
+    }
+    setIntro(true)
+  }
+
+  const endIntro = () => {
+    setIntro(false)
+    setIntroDone(true)
+  }
+
   const headerBtn =
     'flex items-center gap-1.5 rounded-lg border border-line bg-surface-2/60 px-2.5 py-1.5 text-xs sm:text-sm transition-colors'
+
+  // 四塊面板在開場結束後才淡入(各自從外側輕輕滑進來)
+  const chrome = 'transition-all duration-500 ease-out'
+  const chromeHidden = introDone ? 'opacity-100' : 'pointer-events-none opacity-0'
 
   return (
     <div className="relative flex h-full w-full flex-col bg-ground">
       {/* 頂部工具列:品牌 + 所有控制,取代散落的浮層按鈕 */}
-      <header className="relative z-30 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface/70 px-3 py-2 backdrop-blur-xl sm:px-4">
+      <header
+        className={`relative z-30 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface/70 px-3 py-2 backdrop-blur-xl sm:px-4 ${chrome} ${chromeHidden} ${
+          introDone ? 'translate-y-0' : '-translate-y-3'
+        }`}
+      >
         {/* 品牌(游標靠近整區 → 綠點呼吸燈) */}
         <div className="group/brand flex cursor-default items-center gap-2">
           <span className="brand-dot inline-block h-2 w-2 rounded-full bg-accent" />
@@ -470,6 +568,7 @@ function App() {
                   selectedName={selectedName}
                   opacity={opacity}
                   onPick={handlePick}
+                  flash={intro ? INTRO_FLASH[flashIndex] : null}
                   onReady={() => {
                     resetView(false)
                     setModelReady(true)
@@ -481,6 +580,13 @@ function App() {
             {/* 情境式拖曳:按下時判斷游標下有無模型,切換旋轉/平移 */}
             <DragMode groupRef={groupRef} controlsRef={controlsRef} />
 
+            {/* 開場:繞著模型轉一圈 */}
+            <IntroSpin
+              active={intro}
+              controlsRef={controlsRef}
+              onDone={endIntro}
+            />
+
             {/* 從清單選肌肉時,平滑把鏡頭轉到該肌肉並置中 */}
             <FocusAnimator
               goal={focusGoal}
@@ -491,6 +597,8 @@ function App() {
             {/* 允許平移(拖空白處)+ 上下旋轉;polar 範圍避免翻到正上方/正下方 */}
             <OrbitControls
               ref={controlsRef}
+              /* 開場運鏡期間不接受操作,避免使用者拖曳與動畫互相打架 */
+              enabled={!intro}
               enablePan
               screenSpacePanning
               makeDefault
@@ -596,7 +704,13 @@ function App() {
         </div>
 
         {/* 右側動作面板 */}
-        <aside className="pointer-events-auto h-1/2 w-full overflow-hidden border-t border-line bg-surface/70 text-ink backdrop-blur-xl md:h-full md:w-[24rem] md:border-t-0 md:border-l">
+        <aside
+          className={`h-1/2 w-full overflow-hidden border-t border-line bg-surface/70 text-ink backdrop-blur-xl md:h-full md:w-[24rem] md:border-t-0 md:border-l ${chrome} ${
+            introDone
+              ? 'pointer-events-auto translate-x-0 opacity-100'
+              : 'pointer-events-none translate-x-4 opacity-0'
+          }`}
+        >
           <Panel
             meshName={selectedName}
             muscle={muscle}
@@ -615,11 +729,13 @@ function App() {
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
 
       {/* 啟動畫面:蓋住整個畫面直到模型載入完成再淡出 */}
-      <Splash ready={modelReady} />
+      <Splash ready={modelReady} onHidden={startIntro} />
 
       {/* Footer:作者署名 + 授權標註(CC BY-SA 法律義務,不可省) */}
       <footer
-        className="relative z-30 border-t border-line bg-surface/70 px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3 backdrop-blur-xl"
+        className={`relative z-30 border-t border-line bg-surface/70 px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3 backdrop-blur-xl ${chrome} ${chromeHidden} ${
+          introDone ? 'translate-y-0' : 'translate-y-3'
+        }`}
         style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
       >
         Vector — 3D Muscle Explorer © 2026 Veky. Anatomy model: BodyParts3D ©

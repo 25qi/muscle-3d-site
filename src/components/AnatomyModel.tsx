@@ -27,6 +27,12 @@ interface AnatomyModelProps {
   onPick: (meshNames: string[], clientX: number, clientY: number) => void
   /** 模型載入並掛載完成後呼叫一次(用來設定初始正面視角) */
   onReady: () => void
+  /**
+   * 開場動畫用的暫時高亮:小寫肌肉名片段(如 "pectoralis major"),
+   * 名稱含此片段的 mesh 全部亮起。與 selectedName 不同,不影響選取狀態;
+   * 有 selectedName 時以 selectedName 優先。
+   */
+  flash?: string | null
 }
 
 /** 從被 raycast 命中的物件取得它的解剖名稱(名字在 mesh 或其父節點上)。 */
@@ -45,6 +51,7 @@ export function AnatomyModel({
   opacity,
   onPick,
   onReady,
+  flash = null,
 }: AnatomyModelProps) {
   const { scene } = useGLTF(MODEL_URL)
   const downPos = useRef<{ x: number; y: number } | null>(null)
@@ -73,13 +80,18 @@ export function AnatomyModel({
   // 套用高亮 + 透明度:選中的(含左右對稱另一邊)加藍光且維持不透明,其餘套用滑桿透明度
   useEffect(() => {
     const selectedKey = selectedName ? symmetryKey(selectedName) : null
+    // 沒有選取時才吃開場高亮;mesh 名以底線分隔,先還原成空白再比對
+    const flashKey = selectedKey === null && flash ? flash.toLowerCase() : null
     scene.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (!mesh.isMesh) return
       const mat = mesh.material as THREE.MeshStandardMaterial
       // 不分左右:同一塊肌肉的左右兩邊一起高亮
       const isHighlighted =
-        selectedKey !== null && symmetryKey(mesh.name) === selectedKey
+        selectedKey !== null
+          ? symmetryKey(mesh.name) === selectedKey
+          : flashKey !== null &&
+            mesh.name.toLowerCase().replace(/_/g, ' ').includes(flashKey)
       // 染綠底色(仍受燈光著色 → 保留立體感);未選則還原原始底色
       if (isHighlighted) {
         mat.color.copy(HIGHLIGHT_TINT)
@@ -97,7 +109,7 @@ export function AnatomyModel({
       // 透明時關 depthWrite,讓深層肌肉能透出來(x-ray 視覺)
       mat.depthWrite = o2 >= 1
     })
-  }, [selectedName, opacity, scene])
+  }, [selectedName, opacity, scene, flash])
 
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
     downPos.current = { x: e.clientX, y: e.clientY }

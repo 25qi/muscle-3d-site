@@ -10,7 +10,14 @@ const FADE_MS = 400
  * 啟動畫面:蓋住整個畫面直到 3D 模型真的載入完成(而非固定秒數),
  * 再淡出。避免初次進站時看到白閃與模型跳一下。
  */
-export function Splash({ ready }: { ready: boolean }) {
+export function Splash({
+  ready,
+  onHidden,
+}: {
+  ready: boolean
+  /** 完全淡出後呼叫一次;開場動畫等這個訊號才開始,才不會被遮住 */
+  onHidden?: () => void
+}) {
   const { progress } = useProgress() // drei 的全域載入進度(可在 Canvas 外使用)
   const [hidden, setHidden] = useState(false)
   const [fading, setFading] = useState(false)
@@ -21,11 +28,16 @@ export function Splash({ ready }: { ready: boolean }) {
     const start = performance.now()
     const wait = Math.max(0, MIN_VISIBLE_MS - (performance.now() - start))
     const t1 = setTimeout(() => setFading(true), wait)
-    const t2 = setTimeout(() => setHidden(true), wait + FADE_MS)
+    const t2 = setTimeout(() => {
+      setHidden(true)
+      onHidden?.()
+    }, wait + FADE_MS)
     return () => {
       clearTimeout(t1)
       clearTimeout(t2)
     }
+    // onHidden 只需在 ready 轉為 true 時綁定一次
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready])
 
   if (hidden) return null
