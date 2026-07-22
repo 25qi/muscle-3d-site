@@ -4,7 +4,20 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0d10" />
     <title>Vector — 3D Muscle Explorer</title>
+    <!--
+      在 CSS/JS 下載完成前就先塗上深色底,避免瀏覽器預設白底閃一下。
+      這段必須內嵌,不能等外部樣式表。
+    -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0b0d10;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

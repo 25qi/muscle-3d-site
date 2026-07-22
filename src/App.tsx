@@ -8,6 +8,7 @@ import { Loader } from './components/Loader'
 import { Panel } from './components/Panel'
 import { MuscleList } from './components/MuscleList'
 import { FeedbackModal } from './components/FeedbackModal'
+import { Splash } from './components/Splash'
 import { muscleName, symmetryKey } from './data/muscleNameZh'
 import { resolveMuscle } from './lib/recommend'
 import { useFavorites } from './lib/useFavorites'
@@ -129,6 +130,7 @@ function App() {
   const [focusGoal, setFocusGoal] = useState<FocusGoal | null>(null) // 鏡頭要平滑移到的目標
   const [showFavorites, setShowFavorites] = useState(false) // 是否顯示「我的最愛」
   const [showFeedback, setShowFeedback] = useState(false) // 是否顯示留言板
+  const [modelReady, setModelReady] = useState(false) // 模型載入完成 → 收起啟動畫面
   const { favorites, toggle: toggleFav } = useFavorites()
   // 肌肉收藏(存去左右的基本名,如 "gluteus maximus")
   const { favorites: favMuscles, toggle: toggleFavMuscle } = useFavorites(
@@ -344,8 +346,12 @@ function App() {
         <div className="ml-auto flex flex-wrap items-center gap-1.5">
           <button
             type="button"
-            onClick={() => setShowList(true)}
-            className={`${headerBtn} text-ink-2 hover:text-ink`}
+            onClick={() => setShowList((v) => !v)}
+            className={`${headerBtn} ${
+              showList
+                ? 'border-accent/40 text-accent'
+                : 'text-ink-2 hover:text-ink'
+            }`}
           >
             <IconMenu /> {t('muscles')}
           </button>
@@ -461,7 +467,10 @@ function App() {
                   selectedName={selectedName}
                   opacity={opacity}
                   onPick={handlePick}
-                  onReady={() => resetView(false)}
+                  onReady={() => {
+                    resetView(false)
+                    setModelReady(true)
+                  }}
                 />
               </group>
             </Suspense>
@@ -601,6 +610,9 @@ function App() {
       </div>
 
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
+
+      {/* 啟動畫面:蓋住整個畫面直到模型載入完成再淡出 */}
+      <Splash ready={modelReady} />
 
       {/* Footer:作者署名 + 授權標註(CC BY-SA 法律義務,不可省) */}
       <footer className="relative z-30 border-t border-line bg-surface/70 px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3 backdrop-blur-xl">

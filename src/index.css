@@ -55,14 +55,23 @@ body {
   background: transparent;
   cursor: pointer;
   height: 16px; /* 加大可點擊範圍,視覺仍是細軌道 */
+  /* 平時整體灰階,hover/拖曳/鍵盤聚焦才轉主色 */
+  --range-fill: var(--color-ink-3);
+  --range-thumb: var(--color-ink-3);
+}
+.range-accent:hover,
+.range-accent:active,
+.range-accent:focus-visible {
+  --range-fill: var(--color-accent);
+  --range-thumb: var(--color-accent);
 }
 .range-accent::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 9999px;
   background: linear-gradient(
     to right,
-    var(--color-accent) 0%,
-    var(--color-accent) calc(var(--range-progress, 0.5) * 100%),
+    var(--range-fill) 0%,
+    var(--range-fill) calc(var(--range-progress, 0.5) * 100%),
     var(--color-line) calc(var(--range-progress, 0.5) * 100%),
     var(--color-line) 100%
   );
@@ -75,7 +84,7 @@ body {
 .range-accent::-moz-range-progress {
   height: 4px;
   border-radius: 9999px;
-  background: var(--color-accent);
+  background: var(--range-fill);
 }
 .range-accent::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -83,7 +92,7 @@ body {
   height: 12px;
   margin-top: -4px; /* 對齊 4px 軌道中心 */
   border-radius: 9999px;
-  background: var(--color-accent);
+  background: var(--range-thumb);
   border: none;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
   transition:
@@ -94,7 +103,7 @@ body {
   width: 12px;
   height: 12px;
   border-radius: 9999px;
-  background: var(--color-accent);
+  background: var(--range-thumb);
   border: none;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
   transition:
