@@ -266,9 +266,12 @@ export function Panel({
             {/* 收藏的肌肉:點名字 → 選取並聚焦;點星 → 移除收藏 */}
             {muscleItems.length > 0 && (
               <div>
-                <div className="mb-2 px-1 text-xs font-medium tracking-wide text-ink-3">
-                  {t('musclesSection')}
-                  <span className="ml-1.5 text-ink-3/70">
+                <div className="mb-2.5 flex items-center gap-2 border-b border-line pb-2">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+                  <span className="text-sm font-semibold text-ink">
+                    {t('musclesSection')}
+                  </span>
+                  <span className="text-xs tabular-nums text-ink-3">
                     {muscleItems.length}
                   </span>
                 </div>
@@ -299,15 +302,20 @@ export function Panel({
               </div>
             )}
 
-            {items.length > 0 && muscleItems.length > 0 && (
-              <div className="px-1 text-xs font-medium tracking-wide text-ink-3">
-                {t('exercisesSection')}
-                <span className="ml-1.5 text-ink-3/70">{items.length}</span>
+            {items.length > 0 && (
+              <div className="mb-2.5 flex items-center gap-2 border-b border-line pb-2">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+                <span className="text-sm font-semibold text-ink">
+                  {t('exercisesSection')}
+                </span>
+                <span className="text-xs tabular-nums text-ink-3">
+                  {items.length}
+                </span>
               </div>
             )}
             {groups.map((g) => (
-              <div key={g.key}>
-                <div className="mb-2 px-1 text-xs font-medium tracking-wide text-ink-3">
+              <div key={g.key} className="pl-2">
+                <div className="mb-2 border-l-2 border-line pl-2 text-xs font-medium tracking-wide text-ink-3">
                   {g.label}
                   <span className="ml-1.5 text-ink-3/70">{g.items.length}</span>
                 </div>
