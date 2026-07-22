@@ -428,7 +428,7 @@ function App() {
               value={opacity}
               onChange={(e) => setOpacity(Number(e.target.value))}
               aria-label={t('opacity')}
-              className="range-accent w-16 sm:w-24"
+              className="range-accent w-12 sm:w-16"
               style={
                 {
                   '--range-progress': (opacity - 0.15) / 0.85,
