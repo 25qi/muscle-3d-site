@@ -365,7 +365,7 @@ export function Panel({
   const secondaryName = en ? null : muscleNameEn(meshName)
 
   const chip = (active: boolean) =>
-    'rounded-full px-2.5 py-1 text-xs font-medium transition-colors ' +
+    'rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ' +
     (active
       ? 'bg-accent/20 text-accent ring-1 ring-accent/40'
       : 'bg-surface-2 text-ink-3 ring-1 ring-line hover:text-ink-2')
@@ -403,7 +403,8 @@ export function Panel({
         {muscle ? (
           <>
             <div className="mt-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-sm font-medium text-accent">
+              {/* 與下方篩選 chip 同規格(圓角/內距/字級) */}
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/20 px-2.5 py-1 text-[11px] font-medium text-accent ring-1 ring-accent/40">
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
                 {groupLabel(muscle, lang)}
               </span>

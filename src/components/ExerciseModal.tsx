@@ -63,7 +63,7 @@ export function ExerciseModal({
   // 用 portal 掛到 body:面板有 backdrop-filter,會讓內部的 fixed 元素被侷限、裁切
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 sm:p-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-md sm:p-8"
       onClick={onClose}
     >
       <div
@@ -109,7 +109,7 @@ export function ExerciseModal({
             )}
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-1.5 text-xs">
+          <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
             <span className="rounded-md bg-accent/15 px-2 py-0.5 font-medium text-accent">
               {term(ex.targetMuscle)}
             </span>
