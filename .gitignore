@@ -29,3 +29,6 @@ dist-ssr
 !.env.example
 *.pem
 *.key
+
+# 本機開發筆記(不進版控)
+ARCHITECTURE.local.md

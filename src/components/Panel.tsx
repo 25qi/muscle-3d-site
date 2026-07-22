@@ -114,6 +114,7 @@ function ExerciseCard({
   )
 }
 
+/** Right-hand panel: selected muscle + its exercises, or the favorites view. */
 export function Panel({
   meshName,
   muscle,

@@ -294,6 +294,7 @@ export function muscleName(meshName: string, en: boolean): string {
   return en ? muscleNameEn(meshName) : (muscleNameZh(meshName) ?? muscleNameEn(meshName))
 }
 
+/** Traditional Chinese name for a mesh, or null when the muscle is unknown. */
 export function muscleNameZh(meshName: string): string | null {
   // three.js 載入時會把名字空格換成底線,比對前先換回空格
   const n = meshName.toLowerCase().replace(/_/g, ' ')

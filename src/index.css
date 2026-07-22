@@ -20,8 +20,14 @@ body,
   margin: 0;
 }
 
+/* 行動瀏覽器的網址列會伸縮,100% 會算到大視窗而被裁切;dvh 跟著實際可視高度 */
+#root {
+  height: 100dvh;
+}
+
 body {
   overflow: hidden;
+  overscroll-behavior: none;
   background: var(--color-ground);
   color: var(--color-ink);
   font-family:
@@ -145,23 +151,14 @@ body {
   animation: breathe 2s ease-in-out infinite;
 }
 
-/* 引導卡 CTA 的柔和脈動提示 */
-@keyframes soft-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 7px rgba(45, 212, 191, 0);
-  }
-}
-.hint-pulse {
-  animation: soft-pulse 2.2s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   * {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
+}
+
+/* 觸控裝置上,拖曳模型不應被瀏覽器判讀成捲動/縮放手勢 */
+canvas {
+  touch-action: none;
 }

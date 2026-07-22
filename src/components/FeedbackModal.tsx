@@ -30,6 +30,7 @@ const GISCUS_LANG: Record<Lang, string> = {
   tr: 'tr',
 }
 
+/** Public feedback board rendered in a modal (Giscus / GitHub Discussions). */
 export function FeedbackModal({ onClose }: { onClose: () => void }) {
   const { lang } = useLang()
   const t = useT()

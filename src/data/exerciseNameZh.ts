@@ -338,6 +338,7 @@ const SKIP = new Set([
   'grip',
 ])
 
+/** Translate an English exercise name into Traditional Chinese gym vocabulary. */
 export function exerciseNameZh(name: string): string {
   const toks = name
     .toLowerCase()

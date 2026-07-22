@@ -16,6 +16,7 @@ function load(key: string): Set<string> {
   }
 }
 
+/** localStorage-backed set of favorited ids; one key per collection. */
 export function useFavorites(storageKey: string = DEFAULT_KEY) {
   const [favorites, setFavorites] = useState<Set<string>>(() => load(storageKey))
 

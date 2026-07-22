@@ -4,8 +4,8 @@ import { createContext, useContext, useEffect, useState } from 'react'
 export type Lang = 'en' | 'zh' | 'es' | 'fr' | 'it' | 'pl' | 'tr'
 
 /** 介面/肌肉名只有中英兩版:中文選中文,其餘一律英文 */
-export type UiLang = 'en' | 'zh'
-export const uiLangOf = (lang: Lang): UiLang => (lang === 'zh' ? 'zh' : 'en')
+type UiLang = 'en' | 'zh'
+const uiLangOf = (lang: Lang): UiLang => (lang === 'zh' ? 'zh' : 'en')
 
 /** 語言切換選單(以各語言母語顯示) */
 export const LANGS: { code: Lang; label: string }[] = [
@@ -25,7 +25,6 @@ const STR = {
   opacity: { en: 'Opacity', zh: '透明度' },
   resetView: { en: 'Front view', zh: '正面視角' },
   language: { en: 'Language', zh: '語言' },
-  brand: { en: '3D Muscle Explorer', zh: '肌肉圖鑑 · 3D Muscle Explorer' },
   loading: { en: 'Loading model…', zh: '載入肌肉模型…' },
   searchMuscles: { en: 'Search muscles', zh: '搜尋肌肉(中/英)' },
   noMuscles: { en: 'No muscles found', zh: '找不到符合的肌肉' },
@@ -48,7 +47,6 @@ const STR = {
     en: '← Rotate and click the 3D model on the left, or search in “Muscles”.',
     zh: '← 旋轉、點選左側的 3D 模型,或用左上的「肌肉清單」搜尋',
   },
-  trains: { en: 'Trains', zh: '訓練分類' },
   favOnly: { en: 'Favorites', zh: '只看最愛' },
   primaryOnly: { en: 'Primary only', zh: '只看主要' },
   primary: { en: 'Primary', zh: '主要' },
@@ -75,7 +73,7 @@ const STR = {
   },
 } satisfies Record<string, Record<UiLang, string>>
 
-export type StrKey = keyof typeof STR
+type StrKey = keyof typeof STR
 
 interface LangCtx {
   lang: Lang
@@ -85,6 +83,7 @@ const LangContext = createContext<LangCtx>({ lang: 'zh', setLang: () => {} })
 
 const STORAGE_KEY = 'muscle3d.lang'
 
+/** Provides the selected language to the tree and persists it to localStorage. */
 export function LangProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => {
     try {
@@ -112,7 +111,9 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
+/** Current language plus its setter. */
 export const useLang = () => useContext(LangContext)
+/** Language used for chrome and muscle names (Chinese, otherwise English). */
 export const useUiLang = (): UiLang => uiLangOf(useContext(LangContext).lang)
 
 /** 取介面字串(依目前語言的中/英) */

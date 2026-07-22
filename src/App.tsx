@@ -618,7 +618,10 @@ function App() {
       <Splash ready={modelReady} />
 
       {/* Footer:作者署名 + 授權標註(CC BY-SA 法律義務,不可省) */}
-      <footer className="relative z-30 border-t border-line bg-surface/70 px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3 backdrop-blur-xl">
+      <footer
+        className="relative z-30 border-t border-line bg-surface/70 px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3 backdrop-blur-xl"
+        style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+      >
         Vector — 3D Muscle Explorer © 2026 Veky. Anatomy model: BodyParts3D ©
         The Database Center for Life Science (CC BY-SA 2.1 JP) / Z-Anatomy (CC
         BY-SA 4.0). Exercise data: ExerciseDB (hasaneyldrm/exercises-dataset,

@@ -6,6 +6,7 @@
 const cache = new Map<string, Record<string, string[]>>()
 const loading = new Map<string, Promise<void>>()
 
+/** Fetch and cache a language's exercise steps; EN/ZH are already bundled. */
 export function ensureLang(lang: string): Promise<void> {
   if (lang === 'en' || lang === 'zh' || cache.has(lang)) return Promise.resolve()
   const existing = loading.get(lang)
