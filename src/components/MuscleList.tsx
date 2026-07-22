@@ -91,7 +91,7 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
     })
 
   return (
-    <div className="flex h-full w-64 max-w-[85vw] flex-col border-r border-line bg-surface/80 text-ink backdrop-blur-md">
+    <div className="flex h-full w-64 max-w-[85vw] flex-col border-r border-line bg-surface/70 text-ink backdrop-blur-xl">
       <div className="flex items-center gap-2 border-b border-line p-3">
         <input
           autoFocus

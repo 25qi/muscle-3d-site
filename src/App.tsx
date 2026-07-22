@@ -313,9 +313,9 @@ function App() {
     'flex items-center gap-1.5 rounded-lg border border-line bg-surface-2/60 px-2.5 py-1.5 text-xs sm:text-sm transition-colors'
 
   return (
-    <div className="flex h-full w-full flex-col bg-ground">
+    <div className="relative flex h-full w-full flex-col bg-ground">
       {/* 頂部工具列:品牌 + 所有控制,取代散落的浮層按鈕 */}
-      <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface/80 px-3 py-2 backdrop-blur-md sm:px-4">
+      <header className="relative z-30 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface/70 px-3 py-2 backdrop-blur-xl sm:px-4">
         {/* 品牌 */}
         <div className="flex items-center gap-2">
           <span className="inline-block h-2 w-2 rounded-full bg-accent" />
@@ -435,9 +435,9 @@ function App() {
         </div>
       </header>
 
-      {/* 主區:3D 場景 + 動作面板 */}
-      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-        <div className="relative h-1/2 w-full bg-ground md:h-full md:flex-1">
+      {/* 3D 場景:全幅鋪在最底層,四塊面板浮在其上才會有真正的毛玻璃 */}
+      <div className="absolute inset-0 z-0">
+        <div className="h-full w-full">
           {/* logarithmicDepthBuffer + 收緊 near/far:大幅降低薄片肌肉重疊處的 z-fighting(破洞/斑駁) */}
           <Canvas
             camera={{ position: [0, 0, 800], fov: 45, near: 20, far: 3500 }}
@@ -493,10 +493,15 @@ function App() {
               />
             </EffectComposer>
           </Canvas>
+        </div>
+      </div>
 
+      {/* 中段:左半留給 3D(不擋事件)、右半為動作面板 */}
+      <div className="pointer-events-none relative z-20 flex min-h-0 flex-1 flex-col md:flex-row">
+        <div className="min-h-0 flex-1">
           {/* ④ 可搜尋肌肉清單(左側浮層) */}
           {showList && (
-            <div className="absolute inset-y-0 left-0 z-20">
+            <div className="pointer-events-auto absolute inset-y-0 left-0 z-20">
               <MuscleList
                 selectedName={selectedName}
                 onSelect={focusMuscle}
@@ -518,11 +523,11 @@ function App() {
               return (
                 <>
                   <div
-                    className="fixed inset-0 z-30"
+                    className="pointer-events-auto fixed inset-0 z-30"
                     onClick={() => setPickList(null)}
                   />
                   <div
-                    className="fixed z-40 max-h-[300px] w-56 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1.5 text-sm shadow-2xl backdrop-blur-md"
+                    className="pointer-events-auto fixed z-40 max-h-[300px] w-56 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1.5 text-sm shadow-2xl backdrop-blur-md"
                     style={{ left, top }}
                   >
                     <div className="px-3 py-1 text-[11px] text-ink-3">
@@ -575,7 +580,7 @@ function App() {
         </div>
 
         {/* 右側動作面板 */}
-        <aside className="h-1/2 w-full overflow-hidden border-t border-line bg-surface/80 text-ink backdrop-blur-md md:h-full md:w-[24rem] md:border-t-0 md:border-l">
+        <aside className="pointer-events-auto h-1/2 w-full overflow-hidden border-t border-line bg-surface/70 text-ink backdrop-blur-xl md:h-full md:w-[24rem] md:border-t-0 md:border-l">
           <Panel
             meshName={selectedName}
             muscle={muscle}
@@ -594,7 +599,7 @@ function App() {
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
 
       {/* Footer:作者署名 + 授權標註(CC BY-SA 法律義務,不可省) */}
-      <footer className="border-t border-line bg-surface/80 px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3 backdrop-blur-md">
+      <footer className="relative z-30 border-t border-line bg-surface/70 px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3 backdrop-blur-xl">
         Vector — 3D Muscle Explorer © 2026 Veky. Anatomy model: BodyParts3D ©
         The Database Center for Life Science (CC BY-SA 2.1 JP) / Z-Anatomy (CC
         BY-SA 4.0). Exercise data: ExerciseDB (hasaneyldrm/exercises-dataset,
