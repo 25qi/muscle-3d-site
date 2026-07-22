@@ -83,14 +83,56 @@ const LangContext = createContext<LangCtx>({ lang: 'zh', setLang: () => {} })
 
 const STORAGE_KEY = 'muscle3d.lang'
 
+/** 華語圈時區:瀏覽器語系完全比不到時,才拿來當地理線索 */
+const ZH_TIMEZONES = new Set([
+  'Asia/Taipei',
+  'Asia/Hong_Kong',
+  'Asia/Macau',
+  'Asia/Shanghai',
+  'Asia/Chongqing',
+  'Asia/Harbin',
+  'Asia/Urumqi',
+  'Asia/Kashgar',
+])
+
+/**
+ * 首次到訪時猜一個語言。優先序:
+ *   1. 瀏覽器語系清單(使用者自己設的,最可信;任何 zh-* 都給繁中)
+ *   2. 時區落在華語圈 → 繁中
+ *   3. 其餘一律英文
+ *
+ * 刻意不用 IP 定位:位置不等於語言偏好(在國外的華人、在台灣的外籍人士都會被猜錯),
+ * 而且會多一次第三方請求。此函式純本機判斷,不對外連線。
+ */
+function detectLang(): Lang {
+  const supported = new Set<string>(LANGS.map((l) => l.code))
+  const tags = navigator.languages?.length
+    ? navigator.languages
+    : [navigator.language]
+  for (const tag of tags) {
+    const base = (tag || '').toLowerCase().split('-')[0]
+    if (base === 'zh') return 'zh'
+    if (supported.has(base)) return base as Lang
+  }
+  try {
+    if (ZH_TIMEZONES.has(Intl.DateTimeFormat().resolvedOptions().timeZone)) {
+      return 'zh'
+    }
+  } catch {
+    /* Intl 不可用時忽略,落到英文 */
+  }
+  return 'en'
+}
+
 /** Provides the selected language to the tree and persists it to localStorage. */
 export function LangProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => {
     try {
+      // 使用者手動選過就一律尊重;沒選過(首次到訪)才自動偵測
       const v = localStorage.getItem(STORAGE_KEY) as Lang | null
-      return v && LANGS.some((l) => l.code === v) ? v : 'zh'
+      return v && LANGS.some((l) => l.code === v) ? v : detectLang()
     } catch {
-      return 'zh'
+      return detectLang()
     }
   })
   const setLang = (l: Lang) => {
