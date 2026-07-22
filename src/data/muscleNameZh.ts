@@ -265,6 +265,21 @@ const BASE_NAMES: [string, string][] = [
  * Return the Traditional Chinese name for a mesh, or null if unknown.
  * e.g. "long head of left biceps brachii" -> "肱二頭肌(長頭)"
  */
+/**
+ * 對稱鍵:去掉底線、left/right 與 (2)(3) 編號後的小寫肌肉基本名。
+ * 全站唯一來源 —— 高亮左右兩側、肌肉收藏、清單比對都用它。
+ * e.g. "left_gluteus_maximus" -> "gluteus maximus"
+ */
+export function symmetryKey(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .replace(/\b(left|right)\b/g, '')
+    .replace(/\s*\(\d+\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 /** 英文肌肉名:把底線換空格、去掉 left/right(介面英文時用) */
 export function muscleNameEn(meshName: string): string {
   return meshName

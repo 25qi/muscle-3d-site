@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import type { ThreeEvent } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
+import { symmetryKey } from '../data/muscleNameZh'
 
 const MODEL_URL = '/anatomy.glb'
 
@@ -31,19 +32,6 @@ interface AnatomyModelProps {
 /** 從被 raycast 命中的物件取得它的解剖名稱(名字在 mesh 或其父節點上)。 */
 function meshNameOf(obj: THREE.Object3D): string {
   return obj.name || obj.parent?.name || ''
-}
-
-/**
- * 對稱鍵:去掉 left/right 與底線後的肌肉名,用來讓左右同名肌肉一起高亮。
- * e.g. "left_gluteus_maximus" / "right_gluteus_maximus" -> "gluteus maximus"
- */
-export function symmetryKey(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/_/g, ' ')
-    .replace(/\b(left|right)\b/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
 }
 
 /**

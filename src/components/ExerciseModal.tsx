@@ -1,31 +1,16 @@
-import { useEffect } from 'react'
-import { createPortal } from 'react-dom'
 import type { NormalizedExercise } from '../lib/providers'
 import { muscleTerm } from '../data/muscleTerms'
+import { equipmentLabel } from '../data/equipmentZh'
 import { useLang, useT, useUiLang } from '../lib/i18n'
 import { lazySteps } from '../lib/langSteps'
+import { Modal } from './Modal'
+import { FavoriteStar } from './FavoriteStar'
 
 interface ExerciseModalProps {
   ex: NormalizedExercise
   favorited: boolean
   onToggleFav: () => void
   onClose: () => void
-}
-
-const EQUIP_ZH: Record<string, string> = {
-  'body weight': '徒手',
-  dumbbell: '啞鈴',
-  cable: '滑輪',
-  barbell: '槓鈴',
-  'leverage machine': '槓桿機',
-  band: '彈力帶',
-  'smith machine': '史密斯機',
-  kettlebell: '壺鈴',
-  weighted: '負重',
-  'stability ball': '抗力球',
-  'ez barbell': 'EZ 槓',
-  assisted: '輔助',
-  'medicine ball': '藥球',
 }
 
 /** 全螢幕燈箱:放大的動圖 GIF + 放大的動作說明(依語言),背景變暗。 */
@@ -39,7 +24,7 @@ export function ExerciseModal({
   const t = useT()
   const en = useUiLang() === 'en'
   const term = (m: string) => muscleTerm(m, lang)
-  const equip = (e: string) => (en ? e : (EQUIP_ZH[e] ?? e))
+  const equip = (e: string) => equipmentLabel(e, en)
 
   // 主要顯示語言的步驟(en/zh 內建,其他語言延遲載入)+ 英文步驟對照
   const primarySteps =
@@ -47,29 +32,8 @@ export function ExerciseModal({
   const enSteps = ex.stepsByLang.en ?? []
   const showEn = lang !== 'en'
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prev
-    }
-  }, [onClose])
-
-  // 用 portal 掛到 body:面板有 backdrop-filter,會讓內部的 fixed 元素被侷限、裁切
-  return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-md sm:p-8"
-      onClick={onClose}
-    >
-      <div
-        className="relative flex max-h-[82vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-line bg-surface/95 shadow-2xl backdrop-blur-xl md:flex-row"
-        onClick={(e) => e.stopPropagation()}
-      >
+  return (
+    <Modal onClose={onClose} row>
         <div className="flex flex-none items-center justify-center bg-ground/60 p-4 md:w-[42%]">
           {ex.gifUrl ? (
             <img
@@ -90,17 +54,12 @@ export function ExerciseModal({
               <h2 className="min-w-0 text-2xl font-semibold tracking-tight text-ink capitalize">
                 {en ? ex.name : ex.nameZh}
               </h2>
-              <button
-                type="button"
-                onClick={onToggleFav}
-                aria-label={favorited ? t('removeFav') : t('addFav')}
-                className={
-                  'mt-1 flex-none text-2xl leading-none transition-colors ' +
-                  (favorited ? 'text-accent' : 'text-ink-3 hover:text-accent')
-                }
-              >
-                {favorited ? '★' : '☆'}
-              </button>
+              <FavoriteStar
+                favorited={favorited}
+                onToggle={onToggleFav}
+                size="text-2xl"
+                className="mt-1"
+              />
             </div>
             {!en && (
               <div className="mt-0.5 text-sm text-ink-3 capitalize">
@@ -138,18 +97,7 @@ export function ExerciseModal({
               </li>
             ))}
           </ol>
-        </div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t('close')}
-          className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-lg text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
-        >
-          ✕
-        </button>
       </div>
-    </div>,
-    document.body,
+    </Modal>
   )
 }

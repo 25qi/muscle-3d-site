@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { MUSCLE_LIST } from '../data/muscleList'
 import { MUSCLE_MAP, groupLabel } from '../data/muscleMap'
-import { muscleNameEn, muscleNameZh } from '../data/muscleNameZh'
+import { muscleNameEn, muscleNameZh, symmetryKey } from '../data/muscleNameZh'
 import { resolveMuscle } from '../lib/recommend'
 import { useLang, useT, useUiLang } from '../lib/i18n'
 
@@ -26,16 +26,6 @@ const ITEMS: Item[] = MUSCLE_LIST.map((base) => ({
   groupId: resolveMuscle(base)?.id ?? null,
 }))
 
-function keyOf(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/_/g, ' ')
-    .replace(/\b(left|right)\b/g, '')
-    .replace(/\s*\(\d+\)/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
 /** 依訓練分類折疊的可搜尋肌肉清單:點開分類才顯示其肌肉,點名字即選取高亮。 */
 export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps) {
   const [query, setQuery] = useState('')
@@ -47,7 +37,7 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
   const nameOf = (it: Item) => (en ? it.en : it.zh)
 
   const q = query.trim().toLowerCase()
-  const selectedKey = selectedName ? keyOf(selectedName) : null
+  const selectedKey = selectedName ? symmetryKey(selectedName) : null
 
   // 依語言分組、過濾、排序(未支援放最後)
   const groups = useMemo(() => {

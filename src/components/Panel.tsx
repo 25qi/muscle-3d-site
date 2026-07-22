@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { type MuscleDef, groupLabel } from '../data/muscleMap'
 import { muscleNameEn, muscleNameZh } from '../data/muscleNameZh'
 import { muscleTerm } from '../data/muscleTerms'
+import { equipmentLabel } from '../data/equipmentZh'
 import { PROVIDERS, type NormalizedExercise } from '../lib/providers'
 import { useLang, useT, useUiLang } from '../lib/i18n'
 import { ExerciseModal } from './ExerciseModal'
+import { FavoriteStar } from './FavoriteStar'
 
 interface PanelProps {
   /** 被點到的 mesh 原始解剖名稱(null = 還沒點) */
@@ -29,29 +31,6 @@ interface PanelProps {
   onPickFavMuscle: (base: string) => void
 }
 
-const EQUIP_ZH: Record<string, string> = {
-  'body weight': '徒手',
-  dumbbell: '啞鈴',
-  cable: '滑輪',
-  barbell: '槓鈴',
-  'leverage machine': '槓桿機',
-  band: '彈力帶',
-  'smith machine': '史密斯機',
-  kettlebell: '壺鈴',
-  weighted: '負重',
-  'stability ball': '抗力球',
-  'ez barbell': 'EZ 槓',
-  assisted: '輔助',
-  'sled machine': '雪橇機',
-  'medicine ball': '藥球',
-  rope: '繩索',
-  roller: '滾輪',
-  'resistance band': '阻力帶',
-  'bosu ball': 'BOSU 球',
-  'olympic barbell': '奧林匹克槓',
-  'trap bar': '六角槓',
-}
-const equipZh = (e: string) => EQUIP_ZH[e] ?? e
 
 const provider = PROVIDERS[0]
 
@@ -118,24 +97,18 @@ function ExerciseCard({
               </span>
               {ex.equipment && (
                 <span className="rounded-md bg-line/60 px-1.5 py-0.5 text-ink-2">
-                  {en ? ex.equipment : equipZh(ex.equipment)}
+                  {equipmentLabel(ex.equipment, en)}
                 </span>
               )}
             </div>
           </div>
         </button>
 
-        <button
-          type="button"
-          onClick={onToggleFav}
-          aria-label={favorited ? t('removeFav') : t('addFav')}
-          className={
-            'flex-none px-1 text-lg leading-none transition-colors ' +
-            (favorited ? 'text-accent' : 'text-ink-3 hover:text-accent')
-          }
-        >
-          {favorited ? '★' : '☆'}
-        </button>
+        <FavoriteStar
+          favorited={favorited}
+          onToggle={onToggleFav}
+          className="px-1"
+        />
       </div>
     </li>
   )
@@ -288,14 +261,11 @@ export function Panel({
                       >
                         {m.label}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => toggleFavMuscle(m.base)}
-                        aria-label={t('removeFav')}
-                        className="flex-none px-1 text-lg leading-none text-accent transition-colors hover:text-ink-3"
-                      >
-                        ★
-                      </button>
+                      <FavoriteStar
+                        favorited
+                        onToggle={() => toggleFavMuscle(m.base)}
+                        className="px-1"
+                      />
                     </li>
                   ))}
                 </ul>
@@ -382,17 +352,12 @@ export function Panel({
             {primaryName}
           </h2>
           {/* 收藏這塊肌肉 */}
-          <button
-            type="button"
-            onClick={() => toggleFavMuscle(baseKey)}
-            aria-label={muscleFaved ? t('removeFav') : t('addFav')}
-            className={
-              'flex-none px-1 text-2xl leading-none transition-colors ' +
-              (muscleFaved ? 'text-accent' : 'text-ink-3 hover:text-accent')
-            }
-          >
-            {muscleFaved ? '★' : '☆'}
-          </button>
+          <FavoriteStar
+            favorited={muscleFaved}
+            onToggle={() => toggleFavMuscle(baseKey)}
+            size="text-2xl"
+            className="px-1"
+          />
         </div>
         {secondaryName && (
           <div className="mt-0.5 text-xs tracking-wide text-ink-3 capitalize">
@@ -432,7 +397,7 @@ export function Panel({
                   onClick={() => setEquip((cur) => (cur === e ? null : e))}
                   className={chip(equip === e)}
                 >
-                  {en ? e : equipZh(e)}
+                  {equipmentLabel(e, en)}
                 </button>
               ))}
             </div>

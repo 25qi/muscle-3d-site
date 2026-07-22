@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# 環境變數 / 機密(預防日後誤加)
+.env
+.env.*
+!.env.example
+*.pem
+*.key

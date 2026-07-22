@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
 import Giscus from '@giscus/react'
 import { useLang, useT } from '../lib/i18n'
 import type { Lang } from '../lib/i18n'
+import { Modal } from './Modal'
 
 /**
  * 公開留言板(Giscus,底層是 GitHub repo 的 Discussions)。
@@ -35,26 +35,8 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
   const t = useT()
   const configured = !REPO_ID.startsWith('REPLACE')
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    document.addEventListener('keydown', onKey)
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prev
-    }
-  }, [onClose])
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-md sm:p-8"
-      onClick={onClose}
-    >
-      <div
-        className="relative flex max-h-[82vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line bg-surface/95 shadow-2xl backdrop-blur-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal onClose={onClose} maxWidth="max-w-2xl">
         <div className="border-b border-line p-5">
           <h2 className="text-xl font-semibold tracking-tight text-ink">
             {t('feedbackTitle')}
@@ -85,17 +67,7 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
               category id。
             </div>
           )}
-        </div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t('close')}
-          className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-lg text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
-        >
-          ✕
-        </button>
       </div>
-    </div>
+    </Modal>
   )
 }
