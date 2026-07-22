@@ -122,6 +122,10 @@ function App() {
   const [showFavorites, setShowFavorites] = useState(false) // 是否顯示「我的最愛」
   const [showFeedback, setShowFeedback] = useState(false) // 是否顯示留言板
   const { favorites, toggle: toggleFav } = useFavorites()
+  // 肌肉收藏(存去左右的基本名,如 "gluteus maximus")
+  const { favorites: favMuscles, toggle: toggleFavMuscle } = useFavorites(
+    'muscle3d.favMuscles',
+  )
   const { lang, setLang } = useLang()
   const uiLang = useUiLang()
   const t = useT()
@@ -288,11 +292,128 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedName, muscle])
 
-  const pill =
-    'rounded-xl border border-line bg-surface/70 backdrop-blur-md transition-colors'
+  const headerBtn =
+    'flex items-center gap-1.5 rounded-lg border border-line bg-surface-2/60 px-2.5 py-1.5 text-xs sm:text-sm transition-colors'
 
   return (
     <div className="flex h-full w-full flex-col bg-ground">
+      {/* 頂部工具列:品牌 + 所有控制,取代散落的浮層按鈕 */}
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface px-3 py-2 sm:px-4">
+        {/* 品牌 */}
+        <div className="flex items-center gap-2">
+          <span className="inline-block h-2 w-2 rounded-full bg-accent" />
+          <span className="text-base font-semibold tracking-tight text-ink">
+            Vector
+          </span>
+          <span className="hidden text-xs text-ink-3 sm:inline">
+            3D Muscle Explorer
+          </span>
+        </div>
+
+        {/* 控制群(靠右,窄螢幕自動換行) */}
+        <div className="ml-auto flex flex-wrap items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setShowList(true)}
+            className={`${headerBtn} text-ink-2 hover:text-ink`}
+          >
+            <span className="text-accent">☰</span> {t('muscles')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowFavorites((v) => !v)}
+            className={`${headerBtn} ${
+              showFavorites
+                ? 'border-warn/40 text-warn'
+                : 'text-ink-2 hover:text-ink'
+            }`}
+          >
+            <span className="text-warn">★</span> {t('favorites')}
+            {favorites.size + favMuscles.size > 0 && (
+              <span className="tabular-nums text-ink-3">
+                {favorites.size + favMuscles.size}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowFeedback(true)}
+            className={`${headerBtn} text-ink-2 hover:text-ink`}
+          >
+            💬 <span className="hidden sm:inline">{t('feedback')}</span>
+          </button>
+
+          <div className={`${headerBtn} cursor-default text-ink-2`}>
+            <span className="hidden whitespace-nowrap sm:inline">
+              {t('opacity')}
+            </span>
+            <input
+              type="range"
+              min={0.15}
+              max={1}
+              step={0.05}
+              value={opacity}
+              onChange={(e) => setOpacity(Number(e.target.value))}
+              className="h-1.5 w-16 accent-accent sm:w-24"
+            />
+            <span className="hidden w-9 text-right tabular-nums text-ink sm:inline">
+              {Math.round(opacity * 100)}%
+            </span>
+          </div>
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setLangMenuOpen((v) => !v)}
+              className={`${headerBtn} text-ink-2 hover:text-ink`}
+            >
+              <span>🌐</span>
+              <span className="hidden sm:inline">
+                {LANGS.find((l) => l.code === lang)?.label}
+              </span>
+              <span className="text-ink-3">▾</span>
+            </button>
+            {langMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={() => setLangMenuOpen(false)}
+                />
+                <div className="absolute top-full right-0 z-40 mt-1 max-h-72 w-40 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1 shadow-2xl backdrop-blur-md">
+                  {LANGS.map((l) => (
+                    <button
+                      key={l.code}
+                      type="button"
+                      onClick={() => {
+                        setLang(l.code)
+                        setLangMenuOpen(false)
+                      }}
+                      className={
+                        'block w-full px-3 py-1.5 text-left text-sm transition-colors hover:bg-accent/10 ' +
+                        (l.code === lang
+                          ? 'font-medium text-accent'
+                          : 'text-ink-2 hover:text-ink')
+                      }
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={resetView}
+            className={`${headerBtn} text-ink-2 hover:text-ink`}
+          >
+            <span>⟲</span>
+            <span className="hidden sm:inline">{t('resetView')}</span>
+          </button>
+        </div>
+      </header>
+
       {/* 主區:3D 場景 + 動作面板 */}
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         <div className="relative h-1/2 w-full bg-ground md:h-full md:flex-1">
@@ -351,122 +472,6 @@ function App() {
               />
             </EffectComposer>
           </Canvas>
-
-          {/* 左上控制列:肌肉清單開關 + 透明度滑桿 */}
-          {!showList && (
-            <div className="absolute top-4 left-4 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setShowList(true)}
-                className={`${pill} flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink-2 hover:text-ink`}
-              >
-                <span className="text-base text-accent">☰</span> {t('muscles')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowFavorites((v) => !v)}
-                className={`${pill} flex items-center gap-1.5 px-3.5 py-2.5 text-sm ${
-                  showFavorites ? 'text-warn' : 'text-ink-2 hover:text-ink'
-                }`}
-              >
-                <span className="text-base text-warn">★</span> {t('favorites')}
-                {favorites.size > 0 && (
-                  <span className="tabular-nums text-ink-3">
-                    {favorites.size}
-                  </span>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowFeedback(true)}
-                className={`${pill} flex items-center gap-1.5 px-3.5 py-2.5 text-sm text-ink-2 hover:text-ink`}
-              >
-                <span className="text-base">💬</span> {t('feedback')}
-              </button>
-              <div
-                className={`${pill} flex items-center gap-3 px-3.5 py-2.5 text-sm text-ink-2`}
-              >
-                <span className="whitespace-nowrap">{t('opacity')}</span>
-                <input
-                  type="range"
-                  min={0.15}
-                  max={1}
-                  step={0.05}
-                  value={opacity}
-                  onChange={(e) => setOpacity(Number(e.target.value))}
-                  className="h-1.5 w-28 accent-accent"
-                />
-                <span className="w-9 text-right tabular-nums text-ink">
-                  {Math.round(opacity * 100)}%
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* 右上:語言切換 + 回正面視角 */}
-          <div className="absolute top-4 right-4 flex items-center gap-2">
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setLangMenuOpen((v) => !v)}
-                className={`${pill} flex items-center gap-1.5 px-3.5 py-2.5 text-sm text-ink-2 hover:text-ink`}
-              >
-                <span>🌐</span>
-                {LANGS.find((l) => l.code === lang)?.label}
-                <span className="text-ink-3">▾</span>
-              </button>
-              {langMenuOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-30"
-                    onClick={() => setLangMenuOpen(false)}
-                  />
-                  <div className="absolute top-full right-0 z-40 mt-1 max-h-72 w-40 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1 shadow-2xl backdrop-blur-md">
-                    {LANGS.map((l) => (
-                      <button
-                        key={l.code}
-                        type="button"
-                        onClick={() => {
-                          setLang(l.code)
-                          setLangMenuOpen(false)
-                        }}
-                        className={
-                          'block w-full px-3 py-1.5 text-left text-sm transition-colors hover:bg-accent/10 ' +
-                          (l.code === lang
-                            ? 'font-medium text-accent'
-                            : 'text-ink-2 hover:text-ink')
-                        }
-                      >
-                        {l.label}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={resetView}
-              className={`${pill} flex items-center gap-2 px-3.5 py-2.5 text-sm text-ink-2 hover:text-ink`}
-            >
-              <span className="text-base">⟲</span> {t('resetView')}
-            </button>
-          </div>
-
-          {/* 品牌浮水印 */}
-          <div className="pointer-events-none absolute bottom-4 left-4 text-ink-3">
-            <div className="flex items-center gap-1.5">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-              <span className="text-base font-semibold tracking-tight text-ink-2">
-                Vector
-              </span>
-            </div>
-            <div className="mt-0.5 pl-3 text-[11px] leading-tight">
-              3D Muscle Explorer
-              <br />
-              by veky · 2026
-            </div>
-          </div>
 
           {/* ④ 可搜尋肌肉清單(左側浮層) */}
           {showList && (
@@ -557,18 +562,22 @@ function App() {
             onCloseFavorites={() => setShowFavorites(false)}
             favorites={favorites}
             toggleFav={toggleFav}
+            favMuscles={favMuscles}
+            toggleFavMuscle={toggleFavMuscle}
+            muscleKeyOf={symmetryKey}
+            onPickFavMuscle={focusMuscle}
           />
         </aside>
       </div>
 
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
 
-      {/* Footer 授權標註(CC BY-SA 法律義務,不可省) */}
+      {/* Footer:作者署名 + 授權標註(CC BY-SA 法律義務,不可省) */}
       <footer className="border-t border-line bg-surface px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3">
-        Anatomy model: BodyParts3D © The Database Center for Life Science (CC
-        BY-SA 2.1 JP) / Z-Anatomy (CC BY-SA 4.0). Exercise data: ExerciseDB
-        (hasaneyldrm/exercises-dataset, MIT). Exercise images/GIFs © GymVisual
-        (gymvisual.com).
+        Vector — 3D Muscle Explorer © 2026 Veky. Anatomy model: BodyParts3D ©
+        The Database Center for Life Science (CC BY-SA 2.1 JP) / Z-Anatomy (CC
+        BY-SA 4.0). Exercise data: ExerciseDB (hasaneyldrm/exercises-dataset,
+        MIT). Exercise images/GIFs © GymVisual (gymvisual.com).
       </footer>
     </div>
   )

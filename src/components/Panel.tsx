@@ -19,6 +19,14 @@ interface PanelProps {
   favorites: Set<string>
   /** 切換收藏 */
   toggleFav: (id: string) => void
+  /** 已收藏的肌肉(去左右的基本名) */
+  favMuscles: Set<string>
+  /** 切換肌肉收藏 */
+  toggleFavMuscle: (base: string) => void
+  /** 把 mesh 名稱正規化成肌肉收藏用的基本名 */
+  muscleKeyOf: (name: string) => string
+  /** 在最愛頁點肌肉 → 選取並聚焦 */
+  onPickFavMuscle: (base: string) => void
 }
 
 const EQUIP_ZH: Record<string, string> = {
@@ -140,6 +148,10 @@ export function Panel({
   onCloseFavorites,
   favorites,
   toggleFav,
+  favMuscles,
+  toggleFavMuscle,
+  muscleKeyOf,
+  onPickFavMuscle,
 }: PanelProps) {
   const [openEx, setOpenEx] = useState<NormalizedExercise | null>(null)
   const [primaryOnly, setPrimaryOnly] = useState(false)
@@ -199,6 +211,11 @@ export function Panel({
     const items = [...favorites]
       .map((id) => provider.byId(id))
       .filter((e): e is NormalizedExercise => e !== null)
+    // 收藏的肌肉(基本名 → 顯示名)
+    const muscleItems = [...favMuscles].map((base) => ({
+      base,
+      label: en ? muscleNameEn(base) : (muscleNameZh(base) ?? base),
+    }))
     // 依「主要訓練肌肉」分組(保留加入順序);label 依語言在地化
     const groups: { key: string; label: string; items: NormalizedExercise[] }[] =
       []
@@ -224,7 +241,7 @@ export function Panel({
               {t('favorites')}
             </h2>
             <div className="mt-0.5 text-xs text-ink-3">
-              {items.length} {t('savedCount')}
+              {items.length + muscleItems.length} {t('savedCount')}
             </div>
           </div>
           <button
@@ -237,7 +254,7 @@ export function Panel({
           </button>
         </div>
 
-        {items.length === 0 ? (
+        {items.length === 0 && muscleItems.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
             <div className="text-3xl text-ink-3">☆</div>
             <p className="max-w-[16rem] text-sm leading-relaxed text-ink-2">
@@ -246,6 +263,48 @@ export function Panel({
           </div>
         ) : (
           <div className="flex-1 space-y-5 overflow-y-auto p-4">
+            {/* 收藏的肌肉:點名字 → 選取並聚焦;點星 → 移除收藏 */}
+            {muscleItems.length > 0 && (
+              <div>
+                <div className="mb-2 px-1 text-xs font-medium tracking-wide text-ink-3">
+                  {t('musclesSection')}
+                  <span className="ml-1.5 text-ink-3/70">
+                    {muscleItems.length}
+                  </span>
+                </div>
+                <ul className="space-y-1.5">
+                  {muscleItems.map((m) => (
+                    <li
+                      key={m.base}
+                      className="flex items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 py-2"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => onPickFavMuscle(m.base)}
+                        className="min-w-0 flex-1 truncate text-left text-sm text-ink capitalize hover:text-accent"
+                      >
+                        {m.label}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleFavMuscle(m.base)}
+                        aria-label={t('removeFav')}
+                        className="flex-none px-1 text-lg leading-none text-warn transition-colors hover:text-ink-3"
+                      >
+                        ★
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {items.length > 0 && muscleItems.length > 0 && (
+              <div className="px-1 text-xs font-medium tracking-wide text-ink-3">
+                {t('exercisesSection')}
+                <span className="ml-1.5 text-ink-3/70">{items.length}</span>
+              </div>
+            )}
             {groups.map((g) => (
               <div key={g.key}>
                 <div className="mb-2 px-1 text-xs font-medium tracking-wide text-ink-3">
@@ -302,13 +361,30 @@ export function Panel({
       ? 'bg-accent/20 text-accent ring-1 ring-accent/40'
       : 'bg-surface-2 text-ink-3 ring-1 ring-line hover:text-ink-2')
 
+  const baseKey = muscleKeyOf(meshName)
+  const muscleFaved = favMuscles.has(baseKey)
+
   return (
     <div className="flex h-full flex-col">
       {modal}
-      <div className="border-b border-line p-5">
-        <h2 className="text-2xl font-semibold tracking-tight text-ink capitalize">
-          {primaryName}
-        </h2>
+      <div className="border-b border-line p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-2">
+          <h2 className="text-xl font-semibold tracking-tight text-ink capitalize sm:text-2xl">
+            {primaryName}
+          </h2>
+          {/* 收藏這塊肌肉 */}
+          <button
+            type="button"
+            onClick={() => toggleFavMuscle(baseKey)}
+            aria-label={muscleFaved ? t('removeFav') : t('addFav')}
+            className={
+              'flex-none px-1 text-2xl leading-none transition-colors ' +
+              (muscleFaved ? 'text-warn' : 'text-ink-3 hover:text-warn')
+            }
+          >
+            {muscleFaved ? '★' : '☆'}
+          </button>
+        </div>
         {secondaryName && (
           <div className="mt-0.5 text-xs tracking-wide text-ink-3 capitalize">
             {secondaryName}

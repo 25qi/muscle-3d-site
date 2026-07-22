@@ -53,7 +53,9 @@ const STR = {
   primary: { en: 'Primary', zh: '主要' },
   secondary: { en: 'Secondary', zh: '輔助' },
   noMatch: { en: 'No exercises match', zh: '沒有符合篩選的動作' },
-  savedCount: { en: 'saved exercises', zh: '個收藏動作' },
+  savedCount: { en: 'saved items', zh: '個收藏' },
+  musclesSection: { en: 'Muscles', zh: '肌肉' },
+  exercisesSection: { en: 'Exercises', zh: '動作' },
   favEmpty: {
     en: 'No favorites yet. Tap the ☆ on any exercise to save it — favorites stay in this browser.',
     zh: '還沒有收藏。點任何動作卡右側的 ☆ 就能加入,收藏會留在這個瀏覽器。',
