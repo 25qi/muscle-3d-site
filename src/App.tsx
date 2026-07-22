@@ -1,5 +1,4 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { Bloom, EffectComposer } from '@react-three/postprocessing'
@@ -141,6 +140,19 @@ function App() {
   const en = uiLang === 'en'
   const [, setLangTick] = useState(0)
   const [langMenuOpen, setLangMenuOpen] = useState(false)
+  const langMenuRef = useRef<HTMLDivElement>(null)
+
+  // 點選單以外的地方就關閉(不用全螢幕遮罩,避免蓋住選單本身)
+  useEffect(() => {
+    if (!langMenuOpen) return
+    const onDown = (e: PointerEvent) => {
+      if (!langMenuRef.current?.contains(e.target as Node)) {
+        setLangMenuOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', onDown)
+    return () => document.removeEventListener('pointerdown', onDown)
+  }, [langMenuOpen])
 
   // 選到其他語言時延遲載入其步驟,載到後 re-render
   useEffect(() => {
@@ -342,7 +354,7 @@ function App() {
             onClick={() => setShowFavorites((v) => !v)}
             className={`${headerBtn} ${
               showFavorites
-                ? 'border-warn/40 text-warn'
+                ? 'border-accent/40 text-accent'
                 : 'text-ink-2 hover:text-ink'
             }`}
           >
@@ -361,7 +373,7 @@ function App() {
             <IconChat /> <span className="hidden sm:inline">{t('feedback')}</span>
           </button>
 
-          <div className="relative">
+          <div className="relative" ref={langMenuRef}>
             <button
               type="button"
               onClick={() => setLangMenuOpen((v) => !v)}
@@ -369,39 +381,28 @@ function App() {
             >
               <IconLanguages />
               <span className="hidden sm:inline">{t('language')}</span>
-              <span className="text-ink-3">▾</span>
             </button>
             {langMenuOpen && (
-              <>
-                {/* 遮罩 portal 到 body:header 有 backdrop-filter,fixed 會被侷限在 header 內 */}
-                {createPortal(
-                  <div
-                    className="fixed inset-0 z-30"
-                    onClick={() => setLangMenuOpen(false)}
-                  />,
-                  document.body,
-                )}
-                <div className="absolute top-full right-0 z-40 mt-1 max-h-72 w-40 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1 shadow-2xl backdrop-blur-md">
-                  {LANGS.map((l) => (
-                    <button
-                      key={l.code}
-                      type="button"
-                      onClick={() => {
-                        setLang(l.code)
-                        setLangMenuOpen(false)
-                      }}
-                      className={
-                        'block w-full px-3 py-1.5 text-left text-sm transition-colors hover:bg-accent/10 ' +
-                        (l.code === lang
-                          ? 'font-medium text-accent'
-                          : 'text-ink-2 hover:text-ink')
-                      }
-                    >
-                      {l.label}
-                    </button>
-                  ))}
-                </div>
-              </>
+              <div className="absolute top-full right-0 z-50 mt-1 max-h-72 w-40 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1 shadow-2xl backdrop-blur-md">
+                {LANGS.map((l) => (
+                  <button
+                    key={l.code}
+                    type="button"
+                    onClick={() => {
+                      setLang(l.code)
+                      setLangMenuOpen(false)
+                    }}
+                    className={
+                      'block w-full px-3 py-1.5 text-left text-sm transition-colors hover:bg-accent/10 ' +
+                      (l.code === lang
+                        ? 'font-medium text-accent'
+                        : 'text-ink-2 hover:text-ink')
+                    }
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
 
@@ -570,7 +571,7 @@ function App() {
             })()}
 
           {toast && (
-            <div className="pointer-events-none absolute bottom-16 left-1/2 -translate-x-1/2 rounded-full border border-warn/30 bg-surface-2/90 px-4 py-2 text-sm text-warn shadow-lg backdrop-blur-md">
+            <div className="pointer-events-none absolute bottom-16 left-1/2 -translate-x-1/2 rounded-full border border-accent/30 bg-surface-2/90 px-4 py-2 text-sm text-accent shadow-lg backdrop-blur-md">
               {toast}
             </div>
           )}

@@ -83,28 +83,29 @@ export function ExerciseModal({
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h2 className="text-2xl font-semibold tracking-tight text-ink capitalize">
+          {/* 星號緊跟在標題旁,避免與右上角關閉鈕重疊 */}
+          <div className="pr-10">
+            <div className="flex items-center gap-2">
+              <h2 className="min-w-0 text-2xl font-semibold tracking-tight text-ink capitalize">
                 {en ? ex.name : ex.nameZh}
               </h2>
-              {!en && (
-                <div className="mt-0.5 text-sm text-ink-3 capitalize">
-                  {ex.name}
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={onToggleFav}
+                aria-label={favorited ? t('removeFav') : t('addFav')}
+                className={
+                  'flex-none text-2xl leading-none transition-colors ' +
+                  (favorited ? 'text-accent' : 'text-ink-3 hover:text-accent')
+                }
+              >
+                {favorited ? '★' : '☆'}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onToggleFav}
-              aria-label={favorited ? t('removeFav') : t('addFav')}
-              className={
-                'flex-none px-1 text-2xl leading-none transition-colors ' +
-                (favorited ? 'text-warn' : 'text-ink-3 hover:text-warn')
-              }
-            >
-              {favorited ? '★' : '☆'}
-            </button>
+            {!en && (
+              <div className="mt-0.5 text-sm text-ink-3 capitalize">
+                {ex.name}
+              </div>
+            )}
           </div>
 
           <div className="mt-3 flex flex-wrap gap-1.5 text-xs">

@@ -55,11 +55,13 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
       ...MUSCLE_MAP.map((m) => ({
         id: m.id,
         label: groupLabel(m, lang),
+        labelEn: groupLabel(m, 'en'),
         items: ITEMS.filter((it) => it.groupId === m.id),
       })),
       {
         id: 'unsupported',
         label: t('unsupported'),
+        labelEn: 'Unsupported',
         items: ITEMS.filter((it) => it.groupId === null),
       },
     ]
@@ -124,17 +126,29 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
                 onClick={() => toggle(g.id)}
                 className="flex w-full items-center justify-between px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-surface-2"
               >
-                <span
-                  className={
-                    'flex items-center gap-2 ' +
-                    (unsupported ? 'text-ink-3' : 'text-ink')
-                  }
-                >
+                <span className="flex min-w-0 items-center gap-2">
                   {!unsupported && (
-                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent/70" />
+                    <span className="inline-block h-1.5 w-1.5 flex-none rounded-full bg-accent/70" />
                   )}
-                  {g.label}
-                  <span className="text-xs text-ink-3">{g.items.length}</span>
+                  <span className="min-w-0">
+                    <span
+                      className={
+                        'flex items-center gap-1.5 ' +
+                        (unsupported ? 'text-ink-3' : 'text-ink')
+                      }
+                    >
+                      {g.label}
+                      <span className="text-xs text-ink-3">
+                        {g.items.length}
+                      </span>
+                    </span>
+                    {/* 英文小字(名稱本身已是英文時不重複) */}
+                    {g.label !== g.labelEn && (
+                      <span className="block truncate text-[11px] font-normal text-ink-3">
+                        {g.labelEn}
+                      </span>
+                    )}
+                  </span>
                 </span>
                 <span
                   className={

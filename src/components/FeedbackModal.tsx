@@ -79,7 +79,7 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
               lang={GISCUS_LANG[lang]}
             />
           ) : (
-            <div className="rounded-lg border border-warn/30 bg-warn/10 p-4 text-sm text-ink-2">
+            <div className="rounded-lg border border-accent/30 bg-accent/10 p-4 text-sm text-ink-2">
               留言板尚未設定完成。請依 <code>FeedbackModal.tsx</code>{' '}
               檔頭步驟啟用 GitHub Discussions + giscus,並填入 repo id /
               category id。

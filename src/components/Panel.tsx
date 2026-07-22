@@ -131,7 +131,7 @@ function ExerciseCard({
           aria-label={favorited ? t('removeFav') : t('addFav')}
           className={
             'flex-none px-1 text-lg leading-none transition-colors ' +
-            (favorited ? 'text-warn' : 'text-ink-3 hover:text-warn')
+            (favorited ? 'text-accent' : 'text-ink-3 hover:text-accent')
           }
         >
           {favorited ? '★' : '☆'}
@@ -292,7 +292,7 @@ export function Panel({
                         type="button"
                         onClick={() => toggleFavMuscle(m.base)}
                         aria-label={t('removeFav')}
-                        className="flex-none px-1 text-lg leading-none text-warn transition-colors hover:text-ink-3"
+                        className="flex-none px-1 text-lg leading-none text-accent transition-colors hover:text-ink-3"
                       >
                         ★
                       </button>
@@ -388,7 +388,7 @@ export function Panel({
             aria-label={muscleFaved ? t('removeFav') : t('addFav')}
             className={
               'flex-none px-1 text-2xl leading-none transition-colors ' +
-              (muscleFaved ? 'text-warn' : 'text-ink-3 hover:text-warn')
+              (muscleFaved ? 'text-accent' : 'text-ink-3 hover:text-accent')
             }
           >
             {muscleFaved ? '★' : '☆'}
@@ -438,7 +438,7 @@ export function Panel({
           </>
         ) : (
           <div className="mt-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-warn/15 px-3 py-1 text-sm font-medium text-warn">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-sm font-medium text-accent">
               {t('notSupportedYet')}
             </span>
           </div>
