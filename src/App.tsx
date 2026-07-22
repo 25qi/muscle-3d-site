@@ -421,7 +421,10 @@ function App() {
             <span className="hidden sm:inline">{t('resetView')}</span>
           </button>
 
-          <div className={`${headerBtn} cursor-default text-ink-2`}>
+          {/* group:游標進入整個框就一起變亮(文字)與轉綠(拉桿),與其他按鈕行為一致 */}
+          <div
+            className={`${headerBtn} group cursor-default text-ink-2 hover:text-ink`}
+          >
             <IconOpacity />
             <span className="hidden whitespace-nowrap sm:inline">
               {t('opacity')}

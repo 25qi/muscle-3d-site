@@ -52,7 +52,7 @@ function ExerciseCard({
   const term = (m: string) => muscleTerm(m, lang)
   const sep = en ? ', ' : '、'
   return (
-    <li className="overflow-hidden rounded-xl border border-line bg-surface-2 transition-colors hover:border-ink-3/40">
+    <li className="group overflow-hidden rounded-xl border border-line bg-surface-2 transition-colors hover:border-ink-3/40">
       <div className="flex items-center gap-2 p-2.5">
         <button
           type="button"
@@ -68,7 +68,7 @@ function ExerciseCard({
             />
           )}
           <div className="min-w-0 flex-1">
-            <div className="font-medium text-ink capitalize">
+            <div className="font-medium text-ink transition-colors group-hover:text-accent capitalize">
               {en ? ex.name : ex.nameZh}
             </div>
             {!en && (

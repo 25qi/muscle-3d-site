@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useProgress } from '@react-three/drei'
-import { useT } from '../lib/i18n'
 
 /** 收起前至少顯示這麼久,避免快取命中時閃一下就消失 */
 const MIN_VISIBLE_MS = 500
@@ -29,7 +28,6 @@ export function Splash({ ready }: { ready: boolean }) {
     }
   }, [ready])
 
-  const t = useT()
   if (hidden) return null
 
   return (
@@ -55,9 +53,7 @@ export function Splash({ ready }: { ready: boolean }) {
           style={{ width: `${ready ? 100 : Math.round(progress)}%` }}
         />
       </div>
-      <div className="text-[11px] tabular-nums text-ink-3">
-        {t('loading')} {ready ? 100 : Math.round(progress)}%
-      </div>
+      <div className="text-[11px] text-ink-3">Loading…</div>
     </div>
   )
 }

@@ -59,9 +59,10 @@ body {
   --range-fill: var(--color-ink-3);
   --range-thumb: var(--color-ink-3);
 }
-.range-accent:hover,
 .range-accent:active,
-.range-accent:focus-visible {
+.range-accent:focus-visible,
+/* 游標進入整個控制框(.group)就轉綠,不必剛好在拉桿上 */
+.group:hover .range-accent {
   --range-fill: var(--color-accent);
   --range-thumb: var(--color-accent);
 }
