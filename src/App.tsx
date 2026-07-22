@@ -16,8 +16,9 @@ import { LANGS, useLang, useT, useUiLang } from './lib/i18n'
 import { ensureLang } from './lib/langSteps'
 import {
   IconChat,
-  IconGlobe,
+  IconLanguages,
   IconMenu,
+  IconOpacity,
   IconReset,
   IconStar,
 } from './components/icons'
@@ -360,34 +361,14 @@ function App() {
             <IconChat /> <span className="hidden sm:inline">{t('feedback')}</span>
           </button>
 
-          <div className={`${headerBtn} cursor-default text-ink-2`}>
-            <span className="hidden whitespace-nowrap sm:inline">
-              {t('opacity')}
-            </span>
-            <input
-              type="range"
-              min={0.15}
-              max={1}
-              step={0.05}
-              value={opacity}
-              onChange={(e) => setOpacity(Number(e.target.value))}
-              className="h-1.5 w-16 accent-accent sm:w-24"
-            />
-            <span className="hidden w-9 text-right tabular-nums text-ink-3 sm:inline">
-              {Math.round(opacity * 100)}%
-            </span>
-          </div>
-
           <div className="relative">
             <button
               type="button"
               onClick={() => setLangMenuOpen((v) => !v)}
               className={`${headerBtn} text-ink-2 hover:text-ink`}
             >
-              <IconGlobe />
-              <span className="hidden sm:inline">
-                {LANGS.find((l) => l.code === lang)?.label}
-              </span>
+              <IconLanguages />
+              <span className="hidden sm:inline">{t('language')}</span>
               <span className="text-ink-3">▾</span>
             </button>
             {langMenuOpen && (
@@ -432,6 +413,22 @@ function App() {
             <IconReset />
             <span className="hidden sm:inline">{t('resetView')}</span>
           </button>
+
+          <div className={`${headerBtn} cursor-default text-ink-2`}>
+            <IconOpacity />
+            <span className="hidden whitespace-nowrap sm:inline">
+              {t('opacity')}
+            </span>
+            <input
+              type="range"
+              min={0.15}
+              max={1}
+              step={0.05}
+              value={opacity}
+              onChange={(e) => setOpacity(Number(e.target.value))}
+              className="h-1.5 w-14 accent-accent sm:w-20"
+            />
+          </div>
         </div>
       </header>
 

@@ -23,7 +23,8 @@ const STR = {
   muscles: { en: 'Muscles', zh: '肌肉清單' },
   favorites: { en: 'Favorites', zh: '我的最愛' },
   opacity: { en: 'Opacity', zh: '透明度' },
-  resetView: { en: 'Reset view', zh: '回正面視角' },
+  resetView: { en: 'Front view', zh: '正面視角' },
+  language: { en: 'Language', zh: '語言' },
   brand: { en: '3D Muscle Explorer', zh: '肌肉圖鑑 · 3D Muscle Explorer' },
   loading: { en: 'Loading model…', zh: '載入肌肉模型…' },
   searchMuscles: { en: 'Search muscles', zh: '搜尋肌肉(中/英)' },
@@ -66,7 +67,7 @@ const STR = {
   noGif: { en: 'No demo animation', zh: '無示範動圖' },
   overlapHere: { en: 'overlapping muscles here', zh: '塊重疊肌肉,你想選哪個?' },
   exercisesUnit: { en: 'exercises', zh: '個動作' },
-  feedback: { en: 'Feedback', zh: '留言' },
+  feedback: { en: 'Feedback', zh: '回饋' },
   feedbackTitle: { en: 'Leave feedback', zh: '給作者留言' },
   feedbackHint: {
     en: 'Suggestions to improve this site — public, signed in with GitHub.',

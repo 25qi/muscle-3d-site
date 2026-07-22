@@ -45,16 +45,27 @@ export const IconChat = (p: SVGProps<SVGSVGElement>) => (
   </Svg>
 )
 
-/** 🌐 語言 */
-export const IconGlobe = (p: SVGProps<SVGSVGElement>) => (
+/** 語言/翻譯(Lucide "languages":字母 A 與筆畫,比地球更明確代表語言) */
+export const IconLanguages = (p: SVGProps<SVGSVGElement>) => (
   <Svg {...p}>
-    <circle cx="12" cy="12" r="10" />
-    <line x1="2" y1="12" x2="22" y2="12" />
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    <path d="m5 8 6 6" />
+    <path d="m4 14 6-6 2-3" />
+    <path d="M2 5h12" />
+    <path d="M7 2h1" />
+    <path d="m22 22-5-10-5 10" />
+    <path d="M14 18h6" />
   </Svg>
 )
 
-/** ⟲ 回正面視角 */
+/** 透明度(Lucide "blend":兩個交疊的圓,代表透視/疊層) */
+export const IconOpacity = (p: SVGProps<SVGSVGElement>) => (
+  <Svg {...p}>
+    <circle cx="9" cy="9" r="7" />
+    <circle cx="15" cy="15" r="7" />
+  </Svg>
+)
+
+/** ⟲ 正面視角 */
 export const IconReset = (p: SVGProps<SVGSVGElement>) => (
   <Svg {...p}>
     <polyline points="1 4 1 10 7 10" />
