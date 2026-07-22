@@ -331,9 +331,9 @@ function App() {
     <div className="relative flex h-full w-full flex-col bg-ground">
       {/* 頂部工具列:品牌 + 所有控制,取代散落的浮層按鈕 */}
       <header className="relative z-30 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface/70 px-3 py-2 backdrop-blur-xl sm:px-4">
-        {/* 品牌 */}
-        <div className="flex items-center gap-2">
-          <span className="inline-block h-2 w-2 rounded-full bg-accent" />
+        {/* 品牌(游標靠近整區 → 綠點呼吸燈) */}
+        <div className="group/brand flex cursor-default items-center gap-2">
+          <span className="brand-dot inline-block h-2 w-2 rounded-full bg-accent" />
           <span className="text-base font-semibold tracking-tight text-ink">
             Vector
           </span>

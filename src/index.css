@@ -129,6 +129,22 @@ body {
   outline: none;
 }
 
+/* 品牌圓點:游標靠近品牌區時的呼吸燈(明暗 + 外圈光暈同步) */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    box-shadow: 0 0 0 0 rgb(45 212 191 / 0.35);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 5px rgb(45 212 191 / 0);
+  }
+}
+.group\/brand:hover .brand-dot {
+  animation: breathe 2s ease-in-out infinite;
+}
+
 /* 引導卡 CTA 的柔和脈動提示 */
 @keyframes soft-pulse {
   0%,
