@@ -451,12 +451,9 @@ export function Panel({
         </div>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex items-center justify-between px-5 pt-3 pb-1 text-xs text-ink-3">
-            <span>
-              <span className="tabular-nums text-ink-2">{exercises.length}</span>{' '}
-              / {all.length} {t('exercisesUnit')}
-            </span>
-            <span>{provider.label}</span>
+          <div className="px-5 pt-3 pb-1 text-xs text-ink-3">
+            <span className="tabular-nums text-ink-2">{exercises.length}</span>{' '}
+            / {all.length} {t('exercisesUnit')}
           </div>
           <ul className="flex-1 space-y-2 overflow-y-auto px-4 pt-1 pb-4">
             {exercises.length === 0 && (

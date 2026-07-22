@@ -48,11 +48,11 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 sm:p-8"
       onClick={onClose}
     >
       <div
-        className="relative flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl"
+        className="relative flex max-h-[82vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line bg-surface/95 shadow-2xl backdrop-blur-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="border-b border-line p-5">
@@ -91,7 +91,7 @@ export function FeedbackModal({ onClose }: { onClose: () => void }) {
           type="button"
           onClick={onClose}
           aria-label={t('close')}
-          className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-surface-2/80 text-ink-2 backdrop-blur transition-colors hover:text-ink"
+          className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-lg text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
         >
           ✕
         </button>

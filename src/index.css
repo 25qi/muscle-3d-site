@@ -83,7 +83,7 @@ body {
   height: 13px;
   margin-top: -4.5px; /* 對齊 4px 軌道中心 */
   border-radius: 9999px;
-  background: var(--color-ink);
+  background: var(--color-ink-2);
   border: 2px solid var(--color-accent);
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
   transition:
@@ -94,7 +94,7 @@ body {
   width: 13px;
   height: 13px;
   border-radius: 9999px;
-  background: var(--color-ink);
+  background: var(--color-ink-2);
   border: 2px solid var(--color-accent);
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
   transition:

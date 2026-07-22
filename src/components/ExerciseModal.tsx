@@ -63,19 +63,19 @@ export function ExerciseModal({
   // 用 portal 掛到 body:面板有 backdrop-filter,會讓內部的 fixed 元素被侷限、裁切
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 sm:p-8"
       onClick={onClose}
     >
       <div
-        className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl md:flex-row"
+        className="relative flex max-h-[82vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-line bg-surface/95 shadow-2xl backdrop-blur-xl md:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex flex-none items-center justify-center bg-ground p-4 md:w-1/2">
+        <div className="flex flex-none items-center justify-center bg-ground/60 p-4 md:w-[42%]">
           {ex.gifUrl ? (
             <img
               src={ex.gifUrl}
               alt={ex.name}
-              className="max-h-[36vh] w-auto rounded-xl object-contain md:max-h-[70vh]"
+              className="max-h-[30vh] w-auto rounded-xl object-contain md:max-h-[60vh]"
             />
           ) : (
             <div className="text-ink-3">{t('noGif')}</div>
@@ -84,8 +84,9 @@ export function ExerciseModal({
 
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
           {/* 星號緊跟在標題旁,避免與右上角關閉鈕重疊 */}
-          <div className="pr-10">
-            <div className="flex items-center gap-2">
+          <div className="pr-12">
+            {/* items-start + 微調偏移:標題換行時星號仍對齊第一行 */}
+            <div className="flex items-start gap-2">
               <h2 className="min-w-0 text-2xl font-semibold tracking-tight text-ink capitalize">
                 {en ? ex.name : ex.nameZh}
               </h2>
@@ -94,7 +95,7 @@ export function ExerciseModal({
                 onClick={onToggleFav}
                 aria-label={favorited ? t('removeFav') : t('addFav')}
                 className={
-                  'flex-none text-2xl leading-none transition-colors ' +
+                  'mt-1 flex-none text-2xl leading-none transition-colors ' +
                   (favorited ? 'text-accent' : 'text-ink-3 hover:text-accent')
                 }
               >
@@ -143,7 +144,7 @@ export function ExerciseModal({
           type="button"
           onClick={onClose}
           aria-label={t('close')}
-          className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-surface-2/80 text-ink-2 backdrop-blur transition-colors hover:text-ink"
+          className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-lg text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
         >
           ✕
         </button>
