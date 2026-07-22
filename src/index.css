@@ -44,6 +44,81 @@ body {
   border-radius: 9999px;
 }
 
+/**
+ * 自訂滑桿:已填滿的部分用主色(直觀對應透明度),細軌道全圓角,
+ * 拇指為淺色圓點加主色描邊,hover/拖曳有微幅放大與光環。
+ * 進度用 --range-progress(0–1)由元件以 inline style 傳入。
+ */
+.range-accent {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  height: 16px; /* 加大可點擊範圍,視覺仍是細軌道 */
+}
+.range-accent::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    var(--color-accent) 0%,
+    var(--color-accent) calc(var(--range-progress, 0.5) * 100%),
+    var(--color-line) calc(var(--range-progress, 0.5) * 100%),
+    var(--color-line) 100%
+  );
+}
+.range-accent::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--color-line);
+}
+.range-accent::-moz-range-progress {
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+}
+.range-accent::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: -4.5px; /* 對齊 4px 軌道中心 */
+  border-radius: 9999px;
+  background: var(--color-ink);
+  border: 2px solid var(--color-accent);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.range-accent::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 9999px;
+  background: var(--color-ink);
+  border: 2px solid var(--color-accent);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.range-accent:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+.range-accent:hover::-moz-range-thumb {
+  transform: scale(1.15);
+}
+.range-accent:active::-webkit-slider-thumb,
+.range-accent:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 5px rgb(45 212 191 / 0.25);
+}
+.range-accent:active::-moz-range-thumb,
+.range-accent:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 5px rgb(45 212 191 / 0.25);
+}
+.range-accent:focus {
+  outline: none;
+}
+
 /* 引導卡 CTA 的柔和脈動提示 */
 @keyframes soft-pulse {
   0%,

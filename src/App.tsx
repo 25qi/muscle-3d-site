@@ -427,7 +427,13 @@ function App() {
               step={0.05}
               value={opacity}
               onChange={(e) => setOpacity(Number(e.target.value))}
-              className="h-1.5 w-14 accent-accent sm:w-20"
+              aria-label={t('opacity')}
+              className="range-accent w-16 sm:w-24"
+              style={
+                {
+                  '--range-progress': (opacity - 0.15) / 0.85,
+                } as React.CSSProperties
+              }
             />
           </div>
         </div>
