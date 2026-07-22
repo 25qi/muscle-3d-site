@@ -358,6 +358,7 @@ export function Panel({
     )
   }
 
+  // 英文語言:只顯示英文;其他語言(含歐語):中文名為主 + 英文小字
   const primaryName = en
     ? muscleNameEn(meshName)
     : (muscleNameZh(meshName) ?? meshName)

@@ -13,6 +13,13 @@ import { resolveMuscle } from './lib/recommend'
 import { useFavorites } from './lib/useFavorites'
 import { LANGS, useLang, useT, useUiLang } from './lib/i18n'
 import { ensureLang } from './lib/langSteps'
+import {
+  IconChat,
+  IconGlobe,
+  IconMenu,
+  IconReset,
+  IconStar,
+} from './components/icons'
 
 interface PickList {
   names: string[]
@@ -115,7 +122,7 @@ function DragMode({
 function App() {
   const [selectedName, setSelectedName] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
-  const [opacity, setOpacity] = useState(0.7) // 肌肉透明度預設 70%(可透視深層)
+  const [opacity, setOpacity] = useState(0.5) // 肌肉透明度預設 50%(可透視深層)
   const [showList, setShowList] = useState(false) // 是否顯示可搜尋肌肉清單
   const [pickList, setPickList] = useState<PickList | null>(null) // 游標下多塊重疊時的挑選清單
   const [focusGoal, setFocusGoal] = useState<FocusGoal | null>(null) // 鏡頭要平滑移到的目標
@@ -298,7 +305,7 @@ function App() {
   return (
     <div className="flex h-full w-full flex-col bg-ground">
       {/* 頂部工具列:品牌 + 所有控制,取代散落的浮層按鈕 */}
-      <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface px-3 py-2 sm:px-4">
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface/80 px-3 py-2 backdrop-blur-md sm:px-4">
         {/* 品牌 */}
         <div className="flex items-center gap-2">
           <span className="inline-block h-2 w-2 rounded-full bg-accent" />
@@ -317,7 +324,7 @@ function App() {
             onClick={() => setShowList(true)}
             className={`${headerBtn} text-ink-2 hover:text-ink`}
           >
-            <span className="text-accent">☰</span> {t('muscles')}
+            <IconMenu /> {t('muscles')}
           </button>
           <button
             type="button"
@@ -328,7 +335,7 @@ function App() {
                 : 'text-ink-2 hover:text-ink'
             }`}
           >
-            <span className="text-warn">★</span> {t('favorites')}
+            <IconStar /> {t('favorites')}
             {favorites.size + favMuscles.size > 0 && (
               <span className="tabular-nums text-ink-3">
                 {favorites.size + favMuscles.size}
@@ -340,7 +347,7 @@ function App() {
             onClick={() => setShowFeedback(true)}
             className={`${headerBtn} text-ink-2 hover:text-ink`}
           >
-            💬 <span className="hidden sm:inline">{t('feedback')}</span>
+            <IconChat /> <span className="hidden sm:inline">{t('feedback')}</span>
           </button>
 
           <div className={`${headerBtn} cursor-default text-ink-2`}>
@@ -356,7 +363,7 @@ function App() {
               onChange={(e) => setOpacity(Number(e.target.value))}
               className="h-1.5 w-16 accent-accent sm:w-24"
             />
-            <span className="hidden w-9 text-right tabular-nums text-ink sm:inline">
+            <span className="hidden w-9 text-right tabular-nums text-ink-3 sm:inline">
               {Math.round(opacity * 100)}%
             </span>
           </div>
@@ -367,7 +374,7 @@ function App() {
               onClick={() => setLangMenuOpen((v) => !v)}
               className={`${headerBtn} text-ink-2 hover:text-ink`}
             >
-              <span>🌐</span>
+              <IconGlobe />
               <span className="hidden sm:inline">
                 {LANGS.find((l) => l.code === lang)?.label}
               </span>
@@ -408,7 +415,7 @@ function App() {
             onClick={resetView}
             className={`${headerBtn} text-ink-2 hover:text-ink`}
           >
-            <span>⟲</span>
+            <IconReset />
             <span className="hidden sm:inline">{t('resetView')}</span>
           </button>
         </div>
@@ -554,7 +561,7 @@ function App() {
         </div>
 
         {/* 右側動作面板 */}
-        <aside className="h-1/2 w-full overflow-hidden border-t border-line bg-surface text-ink md:h-full md:w-[24rem] md:border-t-0 md:border-l">
+        <aside className="h-1/2 w-full overflow-hidden border-t border-line bg-surface/80 text-ink backdrop-blur-md md:h-full md:w-[24rem] md:border-t-0 md:border-l">
           <Panel
             meshName={selectedName}
             muscle={muscle}
@@ -573,7 +580,7 @@ function App() {
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
 
       {/* Footer:作者署名 + 授權標註(CC BY-SA 法律義務,不可省) */}
-      <footer className="border-t border-line bg-surface px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3">
+      <footer className="border-t border-line bg-surface/80 px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3 backdrop-blur-md">
         Vector — 3D Muscle Explorer © 2026 Veky. Anatomy model: BodyParts3D ©
         The Database Center for Life Science (CC BY-SA 2.1 JP) / Z-Anatomy (CC
         BY-SA 4.0). Exercise data: ExerciseDB (hasaneyldrm/exercises-dataset,

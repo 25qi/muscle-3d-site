@@ -70,7 +70,8 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
           .filter(
             (it) =>
               !q ||
-              (en ? it.en : it.zh).toLowerCase().includes(q) ||
+              it.zh.toLowerCase().includes(q) ||
+              it.en.toLowerCase().includes(q) ||
               it.base.includes(q),
           )
           .sort((a, b) =>
@@ -90,7 +91,7 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
     })
 
   return (
-    <div className="flex h-full w-64 max-w-[85vw] flex-col border-r border-line bg-surface/95 text-ink backdrop-blur-md">
+    <div className="flex h-full w-64 max-w-[85vw] flex-col border-r border-line bg-surface/80 text-ink backdrop-blur-md">
       <div className="flex items-center gap-2 border-b border-line p-3">
         <input
           autoFocus
@@ -155,13 +156,26 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
                           type="button"
                           onClick={() => onSelect(it.base)}
                           className={
-                            'block w-full truncate border-l-2 py-1.5 pr-3 pl-5 text-left text-sm transition-colors ' +
+                            'block w-full border-l-2 py-1.5 pr-3 pl-5 text-left transition-colors ' +
                             (active
-                              ? 'border-accent bg-accent/10 text-accent'
-                              : 'border-transparent text-ink-2 hover:bg-surface-2 hover:text-ink')
+                              ? 'border-accent bg-accent/10'
+                              : 'border-transparent hover:bg-surface-2')
                           }
                         >
-                          {nameOf(it)}
+                          <span
+                            className={
+                              'block truncate text-sm ' +
+                              (active ? 'text-accent' : 'text-ink-2')
+                            }
+                          >
+                            {nameOf(it)}
+                          </span>
+                          {/* 英文小字(任何語言都顯示;主名已是英文時不重複) */}
+                          {nameOf(it) !== it.en && (
+                            <span className="block truncate text-[11px] text-ink-3 capitalize">
+                              {it.en}
+                            </span>
+                          )}
                         </button>
                       </li>
                     )
