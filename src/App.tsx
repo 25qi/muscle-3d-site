@@ -80,7 +80,7 @@ function FocusAnimator({
 }
 
 /** 開場:自轉一圈 + 依序點亮代表性肌肉的總時長(秒) */
-const INTRO_DURATION = 3
+const INTRO_DURATION = 2
 /**
  * 開場輪流點亮的肌肉(小寫片段,比對 mesh 名)。
  * 順序刻意跟著鏡頭轉動:前 → 側 → 背 → 轉回正面。
@@ -91,7 +91,6 @@ const INTRO_FLASH = [
   'deltoid',
   'latissimus dorsi',
   'gluteus maximus',
-  'biceps brachii',
 ]
 
 /**
