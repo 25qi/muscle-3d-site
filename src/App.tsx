@@ -675,7 +675,7 @@ function App() {
                     onClick={() => setPickList(null)}
                   />
                   <div
-                    className="pointer-events-auto fixed z-40 max-h-[300px] w-56 overflow-y-auto rounded-xl border border-line bg-surface-2/95 py-1.5 text-sm shadow-2xl backdrop-blur-md"
+                    className="pointer-events-auto fixed z-40 max-h-[300px] w-56 overflow-y-auto rounded-xl border border-ink-3/25 bg-[#2c313b]/97 py-1.5 text-sm shadow-2xl backdrop-blur-md"
                     style={{ left, top }}
                   >
                     <div className="px-3 py-1 text-[11px] text-ink-3">

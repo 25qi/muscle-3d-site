@@ -14,6 +14,73 @@ const AUTO_HIDE_MS = 3000
 const FADE_MS = 400
 
 /**
+ * 自製垂直拉桿(不用原生 input:旋轉過的 range 在 iOS 觸控會失效)。
+ * 用 pointer 事件 + pointer capture,滑鼠與觸控行為一致;由下往上代表 0→1。
+ */
+function VerticalSlider({
+  value,
+  min,
+  max,
+  step,
+  onChange,
+  onInteract,
+  ariaLabel,
+}: {
+  value: number
+  min: number
+  max: number
+  step: number
+  onChange: (v: number) => void
+  onInteract: () => void
+  ariaLabel: string
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const pct = (value - min) / (max - min)
+
+  const applyAt = (clientY: number) => {
+    const el = ref.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const t = Math.min(1, Math.max(0, 1 - (clientY - rect.top) / rect.height))
+    const snapped = Math.round((min + t * (max - min)) / step) * step
+    onChange(Math.min(max, Math.max(min, snapped)))
+    onInteract()
+  }
+
+  return (
+    <div
+      ref={ref}
+      role="slider"
+      aria-label={ariaLabel}
+      aria-valuemin={min}
+      aria-valuemax={max}
+      aria-valuenow={value}
+      onPointerDown={(e) => {
+        e.currentTarget.setPointerCapture(e.pointerId)
+        applyAt(e.clientY)
+      }}
+      onPointerMove={(e) => {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) applyAt(e.clientY)
+      }}
+      className="relative h-32 w-6 flex-none cursor-pointer touch-none"
+    >
+      {/* 軌道 */}
+      <div className="absolute inset-y-0 left-1/2 w-1 -translate-x-1/2 rounded-full bg-line" />
+      {/* 已填滿(由下往上) */}
+      <div
+        className="absolute bottom-0 left-1/2 w-1 -translate-x-1/2 rounded-full bg-accent"
+        style={{ height: `${pct * 100}%` }}
+      />
+      {/* 拇指 */}
+      <div
+        className="absolute left-1/2 h-3.5 w-3.5 -translate-x-1/2 translate-y-1/2 rounded-full bg-accent shadow-md"
+        style={{ bottom: `${pct * 100}%` }}
+      />
+    </div>
+  )
+}
+
+/**
  * 手機專屬:漂浮在模型區右下角的操作鈕(正面視角 + 透明度),
  * 仿 3D 軟體把視圖操作放在畫面角落的做法。桌機這些仍在頂部工具列。
  *
@@ -79,34 +146,15 @@ export function ViewportControls({
               shown ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            {/* 旋轉 -90° 把水平拉桿變直向(iOS 相容性最穩);填色自動由下往上 */}
-            <div
-              className="relative flex items-center justify-center"
-              style={{ height: 128, width: 28 }}
-            >
-              <input
-                type="range"
-                min={0.15}
-                max={1}
-                step={0.05}
-                value={opacity}
-                onChange={(e) => {
-                  setOpacity(Number(e.target.value))
-                  scheduleHide()
-                }}
-                aria-label={t('opacity')}
-                className="range-accent"
-                style={
-                  {
-                    width: 128,
-                    transform: 'rotate(-90deg)',
-                    '--range-progress': (opacity - 0.15) / 0.85,
-                    '--range-fill': 'var(--color-accent)',
-                    '--range-thumb': 'var(--color-accent)',
-                  } as React.CSSProperties
-                }
-              />
-            </div>
+            <VerticalSlider
+              value={opacity}
+              min={0.15}
+              max={1}
+              step={0.05}
+              onChange={setOpacity}
+              onInteract={scheduleHide}
+              ariaLabel={t('opacity')}
+            />
           </div>
         )}
 
