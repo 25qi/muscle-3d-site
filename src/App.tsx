@@ -142,6 +142,38 @@ function IntroSpin({
 }
 
 /**
+ * 平移邊界:每幀把注視點(controls.target)夾在模型包圍盒內。
+ * 平移時相機與注視點一起位移,超界時把兩者一併拉回同一量 → 保持視角、只擋越界。
+ * 結果:畫面中心永遠落在人體上,模型不會被拖出視窗(手機/平板/桌機皆然)。
+ */
+function PanLimit({
+  controlsRef,
+  boxRef,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  controlsRef: React.RefObject<any>
+  boxRef: React.RefObject<THREE.Box3 | null>
+}) {
+  useFrame(() => {
+    const controls = controlsRef.current
+    const box = boxRef.current
+    if (!controls || !box) return
+    const t = controls.target
+    const cx = Math.min(box.max.x, Math.max(box.min.x, t.x))
+    const cy = Math.min(box.max.y, Math.max(box.min.y, t.y))
+    const cz = Math.min(box.max.z, Math.max(box.min.z, t.z))
+    if (cx !== t.x || cy !== t.y || cz !== t.z) {
+      // 相機跟著位移相同量:維持注視方向與距離,只把越界的平移量抵銷掉
+      controls.object.position.x += cx - t.x
+      controls.object.position.y += cy - t.y
+      controls.object.position.z += cz - t.z
+      t.set(cx, cy, cz)
+    }
+  })
+  return null
+}
+
+/**
  * 情境式拖曳:按下時判斷游標下有沒有模型。
  * 有 → 左鍵/單指=旋轉;沒有(空白處)→ 平移。
  * 用 capture 階段搶在 OrbitControls 之前設定,才會即時生效。
@@ -236,6 +268,7 @@ function App() {
   const controlsRef = useRef<any>(null)
   const groupRef = useRef<THREE.Group>(null)
   const centroidRef = useRef<THREE.Vector3 | null>(null) // 幾何重心(只算一次)
+  const panBoxRef = useRef<THREE.Box3 | null>(null) // 平移邊界(注視點鎖在模型包圍盒內)
 
   // 取某肌肉(含左右)的世界包圍盒 + 水平外向方向(前面→前、背面→後、側面→側)
   const muscleBoxDir = (name: string) => {
@@ -353,6 +386,8 @@ function App() {
     const controls = controlsRef.current
     if (!group || !controls) return
     const box = new THREE.Box3().setFromObject(group)
+    // 平移邊界:注視點鎖在模型包圍盒內(畫面中心永遠落在人體上,模型不會被推出視窗)
+    if (!panBoxRef.current) panBoxRef.current = box.clone()
     const bboxC = box.getCenter(new THREE.Vector3())
     const size = box.getSize(new THREE.Vector3())
     const cen = getCentroid(group)
@@ -594,6 +629,9 @@ function App() {
 
             {/* 情境式拖曳:按下時判斷游標下有無模型,切換旋轉/平移 */}
             <DragMode groupRef={groupRef} controlsRef={controlsRef} />
+
+            {/* 平移邊界:模型不會被拖出視窗 */}
+            <PanLimit controlsRef={controlsRef} boxRef={panBoxRef} />
 
             {/* 開場:繞著模型轉一圈 */}
             <IntroSpin
