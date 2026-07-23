@@ -45,14 +45,9 @@ export function ExerciseModal({
                 height={180}
                 className="h-[180px] w-[180px] rounded-xl object-contain"
               />
-              <a
-                href="https://gymvisual.com"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="text-[10px] text-ink-3 transition-colors hover:text-ink-2"
-              >
+              <span className="text-[10px] text-ink-3">
                 Exercise images/GIFs © GymVisual (https://gymvisual.com)
-              </a>
+              </span>
             </>
           ) : (
             <div className="text-ink-3">{t('noGif')}</div>

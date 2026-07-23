@@ -741,16 +741,7 @@ function App() {
         Vector — 3D Muscle Explorer © 2026 Veky. Anatomy model: BodyParts3D ©
         The Database Center for Life Science (CC BY-SA 2.1 JP) / Z-Anatomy (CC
         BY-SA 4.0). Exercise data: ExerciseDB (hasaneyldrm/exercises-dataset,
-        MIT). Exercise images/GIFs © GymVisual (
-        <a
-          href="https://gymvisual.com"
-          target="_blank"
-          rel="noreferrer noopener"
-          className="underline decoration-dotted underline-offset-2 hover:text-ink-2"
-        >
-          https://gymvisual.com
-        </a>
-        )
+        MIT). Exercise images/GIFs © GymVisual (https://gymvisual.com)
       </footer>
     </div>
   )
