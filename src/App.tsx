@@ -723,7 +723,7 @@ function App() {
                     className="pointer-events-auto fixed z-40 max-h-[300px] w-56 overflow-y-auto rounded-xl border border-ink-3/25 bg-[#2c313b]/97 py-1.5 text-sm shadow-2xl backdrop-blur-md"
                     style={{ left, top }}
                   >
-                    <div className="px-3 py-1 text-[11px] text-ink-3">
+                    <div className="px-3 py-1 text-[11px] text-ink-2">
                       {en
                         ? `${pickList.names.length} ${t('overlapHere')}`
                         : `這裡有 ${pickList.names.length} ${t('overlapHere')}`}
@@ -746,14 +746,14 @@ function App() {
                               active
                                 ? 'font-medium text-accent'
                                 : supported
-                                  ? 'text-ink-2'
-                                  : 'text-ink-3'
+                                  ? 'text-ink'
+                                  : 'text-ink-2'
                             }
                           >
                             {muscleName(name, en)}
                           </span>
                           {!supported && (
-                            <span className="flex-none text-[10px] text-ink-3">
+                            <span className="flex-none text-[10px] text-ink-2">
                               {t('unsupported')}
                             </span>
                           )}
