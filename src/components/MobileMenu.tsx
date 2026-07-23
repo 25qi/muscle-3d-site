@@ -58,17 +58,22 @@ export function MobileMenu({
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* 抽屜標題列 */}
+        {/* 抽屜標題列:品牌 + 小字副標(手機頂部工具列放不下,收在這裡) */}
         <div className="flex items-center gap-2 border-b border-line p-3">
-          <span className="inline-block h-2 w-2 rounded-full bg-accent" />
-          <span className="text-base font-semibold tracking-tight text-ink">
-            Vector
-          </span>
+          <span className="inline-block h-2 w-2 flex-none rounded-full bg-accent" />
+          <div className="min-w-0">
+            <div className="text-base font-semibold leading-tight tracking-tight text-ink">
+              Vector
+            </div>
+            <div className="text-[11px] leading-tight text-ink-3">
+              3D Muscle Explorer
+            </div>
+          </div>
           <button
             type="button"
             onClick={onClose}
             aria-label={t('close')}
-            className="ml-auto rounded-lg px-2 py-1.5 text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+            className="ml-auto flex-none rounded-lg px-2 py-1.5 text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
           >
             ✕
           </button>
