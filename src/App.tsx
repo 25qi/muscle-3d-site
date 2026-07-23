@@ -386,8 +386,14 @@ function App() {
     const controls = controlsRef.current
     if (!group || !controls) return
     const box = new THREE.Box3().setFromObject(group)
-    // 平移邊界:注視點鎖在模型包圍盒內(畫面中心永遠落在人體上,模型不會被推出視窗)
-    if (!panBoxRef.current) panBoxRef.current = box.clone()
+    // 平移邊界:以模型包圍盒為基準再往外擴一圈(上下左右各多留約 0.6 個身形),
+    // 平移有足夠餘裕、但仍拖不出畫面。要更寬/更緊改這個係數即可。
+    if (!panBoxRef.current) {
+      const pb = box.clone()
+      const s = pb.getSize(new THREE.Vector3())
+      pb.expandByVector(s.multiplyScalar(0.6))
+      panBoxRef.current = pb
+    }
     const bboxC = box.getCenter(new THREE.Vector3())
     const size = box.getSize(new THREE.Vector3())
     const cen = getCentroid(group)
