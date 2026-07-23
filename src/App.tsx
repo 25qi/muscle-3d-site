@@ -720,7 +720,7 @@ function App() {
                     onClick={() => setPickList(null)}
                   />
                   <div
-                    className="pointer-events-auto fixed z-40 max-h-[300px] w-56 overflow-y-auto rounded-xl border border-ink-3/25 bg-[#2c313b]/97 py-1.5 text-sm shadow-2xl backdrop-blur-md"
+                    className="pointer-events-auto fixed z-40 max-h-[300px] w-56 overflow-y-auto rounded-xl border border-ink-3/30 bg-[#242a33]/98 py-1.5 text-sm shadow-2xl backdrop-blur-md"
                     style={{ left, top }}
                   >
                     <div className="px-3 py-1 text-[11px] text-ink-2">
@@ -746,7 +746,7 @@ function App() {
                               active
                                 ? 'font-medium text-accent'
                                 : supported
-                                  ? 'text-ink'
+                                  ? 'text-white'
                                   : 'text-ink-2'
                             }
                           >

@@ -63,7 +63,10 @@ const STR = {
   addFav: { en: 'Add to favorites', zh: '加入最愛' },
   removeFav: { en: 'Remove from favorites', zh: '移除最愛' },
   noGif: { en: 'No demo animation', zh: '無示範動圖' },
-  overlapHere: { en: 'overlapping muscles here', zh: '塊重疊肌肉,你想選哪個?' },
+  overlapHere: {
+    en: 'overlapping muscles — pick one',
+    zh: '塊重疊肌肉,你想選哪個?',
+  },
   exercisesUnit: { en: 'exercises', zh: '個動作' },
   feedback: { en: 'Feedback', zh: '回饋' },
   feedbackTitle: { en: 'Leave feedback', zh: '給作者留言' },
