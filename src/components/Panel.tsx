@@ -374,14 +374,26 @@ export function Panel({
     </>
   )
 
+  // 肌群膠囊(手機放標題同行、桌機放標題下方,共用同一份)
+  const groupCapsule = muscle ? (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/20 px-2.5 py-1 text-[11px] font-medium text-accent ring-1 ring-accent/40">
+      <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+      {groupLabel(muscle, lang)}
+    </span>
+  ) : null
+
   return (
     <div className="flex h-full flex-col">
       {modal}
-      <div className="border-b border-line p-4 sm:p-5">
+      <div className="border-b border-line p-3 sm:p-5">
         <div className="flex items-start justify-between gap-2">
-          <h2 className="text-xl font-semibold tracking-tight text-ink capitalize sm:text-2xl">
-            {primaryName}
-          </h2>
+          {/* 手機:標題與肌群膠囊同行(省一行);桌機膠囊改放下方 */}
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+            <h2 className="text-xl font-semibold tracking-tight text-ink capitalize sm:text-2xl">
+              {primaryName}
+            </h2>
+            <span className="md:hidden">{groupCapsule}</span>
+          </div>
           {/* 收藏這塊肌肉 */}
           <FavoriteStar
             favorited={muscleFaved}
@@ -398,13 +410,8 @@ export function Panel({
 
         {muscle ? (
           <>
-            <div className="mt-3">
-              {/* 與下方篩選 chip 同規格(圓角/內距/字級) */}
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/20 px-2.5 py-1 text-[11px] font-medium text-accent ring-1 ring-accent/40">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-                {groupLabel(muscle, lang)}
-              </span>
-            </div>
+            {/* 桌機:肌群膠囊在標題下方(手機已在標題行) */}
+            <div className="mt-3 hidden md:block">{groupCapsule}</div>
 
             {/* 桌機:標籤橫排在標題下方;手機改放左欄(見下方) */}
             <div className="mt-3 hidden flex-wrap gap-1.5 md:flex">
