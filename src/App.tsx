@@ -8,6 +8,9 @@ import { Loader } from './components/Loader'
 import { Panel } from './components/Panel'
 import { MuscleList } from './components/MuscleList'
 import { FeedbackModal } from './components/FeedbackModal'
+import { MobileMenu } from './components/MobileMenu'
+import { AboutModal } from './components/AboutModal'
+import { Credits } from './components/Credits'
 import { Splash } from './components/Splash'
 import { muscleName, symmetryKey } from './data/muscleNameZh'
 import { resolveMuscle } from './lib/recommend'
@@ -188,6 +191,8 @@ function App() {
   const [focusGoal, setFocusGoal] = useState<FocusGoal | null>(null) // 鏡頭要平滑移到的目標
   const [showFavorites, setShowFavorites] = useState(false) // 是否顯示「我的最愛」
   const [showFeedback, setShowFeedback] = useState(false) // 是否顯示留言板
+  const [showMenu, setShowMenu] = useState(false) // 手機側邊選單(漢堡)
+  const [showAbout, setShowAbout] = useState(false) // 關於/授權視窗
   const [modelReady, setModelReady] = useState(false) // 模型載入完成 → 收起啟動畫面
   // 開場動畫:啟動畫面收完 → intro 期間轉一圈並輪流點亮肌肉 → 結束後才浮出四塊面板
   const [intro, setIntro] = useState(false)
@@ -439,8 +444,18 @@ function App() {
           </span>
         </div>
 
-        {/* 控制群(靠右,窄螢幕自動換行) */}
-        <div className="ml-auto flex flex-wrap items-center gap-1.5">
+        {/* 手機:漢堡鈕(右),點開從左側滑出的側邊選單 */}
+        <button
+          type="button"
+          onClick={() => setShowMenu(true)}
+          aria-label={t('muscles')}
+          className={`${headerBtn} ml-auto text-ink-2 md:hidden`}
+        >
+          <IconMenu />
+        </button>
+
+        {/* 桌機:完整控制群(手機收進側邊選單) */}
+        <div className="ml-auto hidden flex-wrap items-center gap-1.5 md:flex">
           <button
             type="button"
             onClick={() => setShowList((v) => !v)}
@@ -730,19 +745,48 @@ function App() {
       {/* 啟動畫面:蓋住整個畫面直到模型載入完成再淡出 */}
       <Splash ready={modelReady} onHidden={startIntro} />
 
-      {/* Footer:作者署名 + 授權標註(CC BY-SA 法律義務,不可省) */}
+      {/* Footer:作者署名 + 授權標註(CC BY-SA 法律義務,不可省)。
+          手機版空間有限,改收進側邊選單的「關於」,此處僅桌機顯示。 */}
       <footer
-        className={`relative z-30 border-t border-line bg-surface/70 px-4 py-2 text-center text-[11px] leading-relaxed text-ink-3 backdrop-blur-xl ${chrome} ${chromeHidden} ${
+        className={`relative z-30 hidden border-t border-line bg-surface/70 px-4 py-2 text-center backdrop-blur-xl md:block ${chrome} ${chromeHidden} ${
           introDone ? 'translate-y-0' : 'translate-y-3'
         }`}
         style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
       >
-        This website was built by Veky. © 2026 Veky. Anatomy model: BodyParts3D
-        ©
-        The Database Center for Life Science (CC BY-SA 2.1 JP) / Z-Anatomy (CC
-        BY-SA 4.0). Exercise data: ExerciseDB (hasaneyldrm/exercises-dataset,
-        MIT). Exercise images/GIFs © GymVisual (https://gymvisual.com)
+        <Credits />
       </footer>
+
+      {/* 手機側邊選單(漢堡):頂部工具列 + 左側肌肉清單 + 關於 */}
+      <MobileMenu
+        open={showMenu}
+        onClose={() => setShowMenu(false)}
+        favCount={favorites.size + favMuscles.size}
+        onOpenFavorites={() => {
+          setShowFavorites(true)
+          setShowMenu(false)
+        }}
+        onFeedback={() => {
+          setShowFeedback(true)
+          setShowMenu(false)
+        }}
+        onReset={() => {
+          resetView(true)
+          setShowMenu(false)
+        }}
+        onAbout={() => {
+          setShowAbout(true)
+          setShowMenu(false)
+        }}
+        opacity={opacity}
+        setOpacity={setOpacity}
+        selectedName={selectedName}
+        onSelectMuscle={(name) => {
+          focusMuscle(name)
+          setShowMenu(false)
+        }}
+      />
+
+      {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
     </div>
   )
 }

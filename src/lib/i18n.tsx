@@ -71,6 +71,7 @@ const STR = {
     en: 'Suggestions to improve this site — public, signed in with GitHub.',
     zh: '給這個網站的改進建議(公開,使用 GitHub 帳號留言)。',
   },
+  about: { en: 'About & credits', zh: '關於與授權' },
 } satisfies Record<string, Record<UiLang, string>>
 
 type StrKey = keyof typeof STR

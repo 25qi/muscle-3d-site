@@ -9,6 +9,11 @@ interface MuscleListProps {
   selectedName: string | null
   onSelect: (name: string) => void
   onClose: () => void
+  /**
+   * 嵌在手機側邊選單裡:填滿寬度、去掉自身外框與關閉鈕(選單自帶),
+   * 也不自動聚焦搜尋框(避免一開選單就彈鍵盤)。
+   */
+  embedded?: boolean
 }
 
 interface Item {
@@ -27,7 +32,12 @@ const ITEMS: Item[] = MUSCLE_LIST.map((base) => ({
 }))
 
 /** 依訓練分類折疊的可搜尋肌肉清單:點開分類才顯示其肌肉,點名字即選取高亮。 */
-export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps) {
+export function MuscleList({
+  selectedName,
+  onSelect,
+  onClose,
+  embedded = false,
+}: MuscleListProps) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState<Set<string>>(new Set())
   const t = useT()
@@ -83,23 +93,31 @@ export function MuscleList({ selectedName, onSelect, onClose }: MuscleListProps)
     })
 
   return (
-    <div className="flex h-full w-64 max-w-[85vw] flex-col border-r border-line bg-surface/70 text-ink backdrop-blur-xl">
+    <div
+      className={
+        embedded
+          ? 'flex h-full w-full flex-col text-ink'
+          : 'flex h-full w-64 max-w-[85vw] flex-col border-r border-line bg-surface/70 text-ink backdrop-blur-xl'
+      }
+    >
       <div className="flex items-center gap-2 border-b border-line p-3">
         <input
-          autoFocus
+          autoFocus={!embedded}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('searchMuscles')}
           className="min-w-0 flex-1 rounded-lg border border-line bg-ground px-2.5 py-2 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-accent/60"
         />
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex-none rounded-lg px-2 py-1.5 text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
-          aria-label={t('close')}
-        >
-          ✕
-        </button>
+        {!embedded && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-none rounded-lg px-2 py-1.5 text-ink-3 transition-colors hover:bg-surface-2 hover:text-ink"
+            aria-label={t('close')}
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto">

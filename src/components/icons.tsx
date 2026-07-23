@@ -72,3 +72,12 @@ export const IconReset = (p: SVGProps<SVGSVGElement>) => (
     <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
   </Svg>
 )
+
+/** ⓘ 關於/資訊 */
+export const IconInfo = (p: SVGProps<SVGSVGElement>) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </Svg>
+)
