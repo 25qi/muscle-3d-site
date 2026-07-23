@@ -34,13 +34,26 @@ export function ExerciseModal({
 
   return (
     <Modal onClose={onClose} row>
-        <div className="flex flex-none items-center justify-center bg-ground/60 p-4 md:w-[42%]">
+        <div className="flex flex-none flex-col items-center justify-center gap-2 bg-ground/60 p-4 md:w-[42%]">
           {ex.gifUrl ? (
-            <img
-              src={ex.gifUrl}
-              alt={ex.name}
-              className="max-h-[30vh] w-auto rounded-xl object-contain md:max-h-[60vh]"
-            />
+            <>
+              {/* 授權方 GymVisual 限定 180×180 原始解析度,不放大以維持清晰 */}
+              <img
+                src={ex.gifUrl}
+                alt={ex.name}
+                width={180}
+                height={180}
+                className="h-[180px] w-[180px] rounded-xl object-contain"
+              />
+              <a
+                href="https://gymvisual.com"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-[10px] text-ink-3 transition-colors hover:text-ink-2"
+              >
+                Exercise images/GIFs © GymVisual (https://gymvisual.com)
+              </a>
+            </>
           ) : (
             <div className="text-ink-3">{t('noGif')}</div>
           )}
