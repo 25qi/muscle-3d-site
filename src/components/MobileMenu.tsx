@@ -2,14 +2,7 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { LANGS, useLang, useT } from '../lib/i18n'
 import { MuscleList } from './MuscleList'
-import {
-  IconChat,
-  IconInfo,
-  IconLanguages,
-  IconOpacity,
-  IconReset,
-  IconStar,
-} from './icons'
+import { IconChat, IconInfo, IconLanguages, IconStar } from './icons'
 
 interface MobileMenuProps {
   open: boolean
@@ -18,10 +11,7 @@ interface MobileMenuProps {
   favCount: number
   onOpenFavorites: () => void
   onFeedback: () => void
-  onReset: () => void
   onAbout: () => void
-  opacity: number
-  setOpacity: (v: number) => void
   selectedName: string | null
   onSelectMuscle: (name: string) => void
 }
@@ -36,10 +26,7 @@ export function MobileMenu({
   favCount,
   onOpenFavorites,
   onFeedback,
-  onReset,
   onAbout,
-  opacity,
-  setOpacity,
   selectedName,
   onSelectMuscle,
 }: MobileMenuProps) {
@@ -132,33 +119,7 @@ export function MobileMenu({
               ))}
             </div>
           )}
-
-          <button type="button" onClick={onReset} className={row}>
-            <IconReset /> {t('resetView')}
-          </button>
-
-          {/* 透明度 */}
-          <div className={`${row} cursor-default hover:bg-transparent`}>
-            <IconOpacity /> {t('opacity')}
-            <input
-              type="range"
-              min={0.15}
-              max={1}
-              step={0.05}
-              value={opacity}
-              onChange={(e) => setOpacity(Number(e.target.value))}
-              aria-label={t('opacity')}
-              className="range-accent ml-auto w-28"
-              style={
-                {
-                  '--range-progress': (opacity - 0.15) / 0.85,
-                  // 手機選單裡拉桿常駐主色(沒有 hover 概念)
-                  '--range-fill': 'var(--color-accent)',
-                  '--range-thumb': 'var(--color-accent)',
-                } as React.CSSProperties
-              }
-            />
-          </div>
+          {/* 正面視角與透明度不在此:已移到模型區右下角的漂浮操作鈕 */}
         </div>
 
         {/* 肌肉清單(填滿剩餘高度,可捲動) */}

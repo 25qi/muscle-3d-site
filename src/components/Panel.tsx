@@ -57,14 +57,14 @@ function ExerciseCard({
         <button
           type="button"
           onClick={onOpen}
-          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+          className="flex min-w-0 flex-1 items-center gap-2.5 text-left sm:gap-3"
         >
           {ex.imageUrl && (
             <img
               src={ex.imageUrl}
               alt=""
               loading="lazy"
-              className="h-16 w-16 flex-none rounded-lg bg-ground object-cover"
+              className="h-12 w-12 flex-none rounded-lg bg-ground object-cover sm:h-16 sm:w-16"
             />
           )}
           <div className="min-w-0 flex-1">
@@ -344,6 +344,36 @@ export function Panel({
   const baseKey = muscleKeyOf(meshName)
   const muscleFaved = favMuscles.has(baseKey)
 
+  // 篩選標籤(桌機放標題下方橫排;手機放左欄直排,共用同一份)
+  const filterChips = (
+    <>
+      <button
+        type="button"
+        onClick={() => setFavOnly((v) => !v)}
+        className={chip(favOnly)}
+      >
+        ★ {t('favOnly')}
+      </button>
+      <button
+        type="button"
+        onClick={() => setPrimaryOnly((v) => !v)}
+        className={chip(primaryOnly)}
+      >
+        {t('primaryOnly')}
+      </button>
+      {equipOptions.map((e) => (
+        <button
+          key={e}
+          type="button"
+          onClick={() => setEquip((cur) => (cur === e ? null : e))}
+          className={chip(equip === e)}
+        >
+          {equipmentLabel(e, en)}
+        </button>
+      ))}
+    </>
+  )
+
   return (
     <div className="flex h-full flex-col">
       {modal}
@@ -376,31 +406,9 @@ export function Panel({
               </span>
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              <button
-                type="button"
-                onClick={() => setFavOnly((v) => !v)}
-                className={chip(favOnly)}
-              >
-                ★ {t('favOnly')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPrimaryOnly((v) => !v)}
-                className={chip(primaryOnly)}
-              >
-                {t('primaryOnly')}
-              </button>
-              {equipOptions.map((e) => (
-                <button
-                  key={e}
-                  type="button"
-                  onClick={() => setEquip((cur) => (cur === e ? null : e))}
-                  className={chip(equip === e)}
-                >
-                  {equipmentLabel(e, en)}
-                </button>
-              ))}
+            {/* 桌機:標籤橫排在標題下方;手機改放左欄(見下方) */}
+            <div className="mt-3 hidden flex-wrap gap-1.5 md:flex">
+              {filterChips}
             </div>
           </>
         ) : (
@@ -417,27 +425,36 @@ export function Panel({
           {t('notSupportedBody')}
         </div>
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="px-5 pt-3 pb-1 text-xs text-ink-3">
-            <span className="tabular-nums text-ink-2">{exercises.length}</span>{' '}
-            / {all.length} {t('exercisesUnit')}
+        // 手機:左欄放標籤、右欄瀏覽動作,中間一條分隔線;桌機仍為上下堆疊
+        <div className="flex min-h-0 flex-1 flex-row md:flex-col">
+          {/* 手機專屬:左側標籤欄(桌機隱藏,標籤在標題下方) */}
+          <div className="flex w-2/5 flex-col items-start gap-1.5 overflow-y-auto border-r border-line p-3 md:hidden">
+            {filterChips}
           </div>
-          <ul className="flex-1 space-y-2 overflow-y-auto px-4 pt-1 pb-4">
-            {exercises.length === 0 && (
-              <li className="px-1 py-6 text-center text-sm text-ink-3">
-                {t('noMatch')}
-              </li>
-            )}
-            {exercises.map((ex) => (
-              <ExerciseCard
-                key={ex.id}
-                ex={ex}
-                favorited={isFav(ex.id)}
-                onToggleFav={() => toggleFav(ex.id)}
-                onOpen={() => setOpenEx(ex)}
-              />
-            ))}
-          </ul>
+
+          {/* 動作清單 */}
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="px-4 pt-3 pb-1 text-xs text-ink-3 sm:px-5">
+              <span className="tabular-nums text-ink-2">{exercises.length}</span>{' '}
+              / {all.length} {t('exercisesUnit')}
+            </div>
+            <ul className="flex-1 space-y-2 overflow-y-auto px-3 pt-1 pb-4 sm:px-4">
+              {exercises.length === 0 && (
+                <li className="px-1 py-6 text-center text-sm text-ink-3">
+                  {t('noMatch')}
+                </li>
+              )}
+              {exercises.map((ex) => (
+                <ExerciseCard
+                  key={ex.id}
+                  ex={ex}
+                  favorited={isFav(ex.id)}
+                  onToggleFav={() => toggleFav(ex.id)}
+                  onOpen={() => setOpenEx(ex)}
+                />
+              ))}
+            </ul>
+          </div>
         </div>
       )}
     </div>

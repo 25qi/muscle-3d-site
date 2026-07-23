@@ -9,6 +9,7 @@ import { Panel } from './components/Panel'
 import { MuscleList } from './components/MuscleList'
 import { FeedbackModal } from './components/FeedbackModal'
 import { MobileMenu } from './components/MobileMenu'
+import { ViewportControls } from './components/ViewportControls'
 import { AboutModal } from './components/AboutModal'
 import { Credits } from './components/Credits'
 import { Splash } from './components/Splash'
@@ -636,7 +637,16 @@ function App() {
 
       {/* 中段:左半留給 3D(不擋事件)、右半為動作面板 */}
       <div className="pointer-events-none relative z-20 flex min-h-0 flex-1 flex-col md:flex-row">
-        <div className="min-h-0 flex-1">
+        <div className="relative min-h-0 flex-1">
+          {/* 手機:模型區右下角漂浮操作鈕(正面視角 + 透明度) */}
+          {introDone && (
+            <ViewportControls
+              opacity={opacity}
+              setOpacity={setOpacity}
+              onReset={() => resetView(true)}
+            />
+          )}
+
           {/* ④ 可搜尋肌肉清單(左側浮層) */}
           {showList && (
             <div className="pointer-events-auto absolute inset-y-0 left-0 z-20">
@@ -769,16 +779,10 @@ function App() {
           setShowFeedback(true)
           setShowMenu(false)
         }}
-        onReset={() => {
-          resetView(true)
-          setShowMenu(false)
-        }}
         onAbout={() => {
           setShowAbout(true)
           setShowMenu(false)
         }}
-        opacity={opacity}
-        setOpacity={setOpacity}
         selectedName={selectedName}
         onSelectMuscle={(name) => {
           focusMuscle(name)
