@@ -738,7 +738,8 @@ function App() {
         }`}
         style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
       >
-        Vector — 3D Muscle Explorer © 2026 Veky. Anatomy model: BodyParts3D ©
+        Vector — 3D Muscle Explorer. Built by Veky, 2026. Anatomy model:
+        BodyParts3D ©
         The Database Center for Life Science (CC BY-SA 2.1 JP) / Z-Anatomy (CC
         BY-SA 4.0). Exercise data: ExerciseDB (hasaneyldrm/exercises-dataset,
         MIT). Exercise images/GIFs © GymVisual (https://gymvisual.com)
