@@ -427,13 +427,14 @@ export function Panel({
       ) : (
         // 手機:左欄放標籤、右欄瀏覽動作,中間一條分隔線;桌機仍為上下堆疊
         <div className="flex min-h-0 flex-1 flex-row md:flex-col">
-          {/* 手機專屬:左側標籤欄(桌機隱藏,標籤在標題下方) */}
-          <div className="flex w-2/5 flex-col items-start gap-1.5 overflow-y-auto border-r border-line p-3 md:hidden">
+          {/* 手機專屬:左側標籤欄(桌機隱藏,標籤在標題下方)。
+              shrink-0 鎖住寬度,否則右側動作卡的最小寬度會把它擠扁。 */}
+          <div className="flex w-2/5 shrink-0 flex-col items-start gap-1.5 overflow-y-auto border-r border-line p-3 md:hidden">
             {filterChips}
           </div>
 
-          {/* 動作清單 */}
-          <div className="flex min-h-0 flex-1 flex-col">
+          {/* 動作清單(min-w-0:允許收縮,內容過長改截斷而非撐開欄位) */}
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <div className="px-4 pt-3 pb-1 text-xs text-ink-3 sm:px-5">
               <span className="tabular-nums text-ink-2">{exercises.length}</span>{' '}
               / {all.length} {t('exercisesUnit')}
