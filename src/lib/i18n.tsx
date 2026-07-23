@@ -56,7 +56,7 @@ const STR = {
   musclesSection: { en: 'Muscles', zh: '肌肉' },
   exercisesSection: { en: 'Exercises', zh: '動作' },
   favEmpty: {
-    en: 'No favorites yet. Tap the ☆ on any exercise to save it — favorites stay in this browser.',
+    en: 'No favorites yet. Tap the ☆ on any exercise to save it. Favorites stay in this browser.',
     zh: '還沒有收藏。點任何動作卡右側的 ☆ 就能加入,收藏會留在這個瀏覽器。',
   },
   close: { en: 'Close', zh: '關閉' },
@@ -64,14 +64,14 @@ const STR = {
   removeFav: { en: 'Remove from favorites', zh: '移除最愛' },
   noGif: { en: 'No demo animation', zh: '無示範動圖' },
   overlapHere: {
-    en: 'overlapping muscles — pick one',
+    en: 'overlapping muscles, pick one',
     zh: '塊重疊肌肉,你想選哪個?',
   },
   exercisesUnit: { en: 'exercises', zh: '個動作' },
   feedback: { en: 'Feedback', zh: '回饋' },
   feedbackTitle: { en: 'Leave feedback', zh: '給作者留言' },
   feedbackHint: {
-    en: 'Suggestions to improve this site — public, signed in with GitHub.',
+    en: 'Suggestions to improve this site. Public, signed in with GitHub.',
     zh: '給這個網站的改進建議(公開,使用 GitHub 帳號留言)。',
   },
   about: { en: 'About & credits', zh: '關於與授權' },
