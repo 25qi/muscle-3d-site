@@ -386,12 +386,13 @@ function App() {
     const controls = controlsRef.current
     if (!group || !controls) return
     const box = new THREE.Box3().setFromObject(group)
-    // 平移邊界:以模型包圍盒為基準再往外擴一圈(上下左右各多留約 0.6 個身形),
-    // 平移有足夠餘裕、但仍拖不出畫面。要更寬/更緊改這個係數即可。
+    // 平移邊界:以模型包圍盒為基準再往外擴一圈,平移有餘裕、但仍拖不出畫面。
+    // 桌機視窗寬、需要更多餘裕 → 用較大係數;手機維持較緊。要調鬆緊改這兩個數。
     if (!panBoxRef.current) {
       const pb = box.clone()
       const s = pb.getSize(new THREE.Vector3())
-      pb.expandByVector(s.multiplyScalar(0.6))
+      const margin = window.innerWidth >= 768 ? 1.4 : 0.6
+      pb.expandByVector(s.multiplyScalar(margin))
       panBoxRef.current = pb
     }
     const bboxC = box.getCenter(new THREE.Vector3())
