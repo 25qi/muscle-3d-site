@@ -75,16 +75,46 @@ const STR = {
     zh: '給這個網站的改進建議(公開,使用 GitHub 帳號留言)。',
   },
   about: { en: 'About & credits', zh: '關於與授權' },
-  aboutLead: {
-    en: 'Vector is a free, interactive 3D muscle explorer. Rotate a 3D human body, click any muscle, and instantly see the best exercises to train it, complete with equipment, step by step instructions and demo animations.',
-    zh: 'Vector 是一個免費的互動式 3D 肌肉圖。你可以旋轉 3D 人體、點選任何一塊肌肉,馬上看到最適合訓練它的動作,附器材、分解步驟與示範動圖。',
-  },
-  aboutUse: {
-    en: 'Browse by clicking the model or searching the muscle list, filter exercises by equipment, save favourites, and switch languages. There is no signup; everything runs in your browser.',
-    zh: '你可以直接點模型或用肌肉清單搜尋,依器材篩選動作,收藏喜歡的動作,還能切換語言。免註冊,全部在瀏覽器裡完成。',
-  },
   aboutSources: { en: 'Sources & credits', zh: '資料來源與授權' },
 } satisfies Record<string, Record<UiLang, string>>
+
+/**
+ * 《關於》的描述文字。這是「內容」而非介面 chrome,所以支援全部七種語言
+ * (介面標籤仍只有中英)。依使用者實際選的語言顯示。
+ */
+const ABOUT_BODY: Record<Lang, { lead: string; use: string }> = {
+  zh: {
+    lead: 'Vector 是一個免費的互動式 3D 肌肉探索工具,讓你在運動前更了解自己的肌肉位置,並和重量訓練連結在一起。你可以自由旋轉和移動人體模型,點選任何一塊肌肉,右側就會列出最適合訓練它的動作,每個動作都附上器材、目標與協同肌群、分解步驟和示範動圖 GIF。',
+    use: '除了直接點模型,還能用肌肉清單瀏覽,並收藏動作與肌肉,以及切換七種語言。免註冊、免安裝。',
+  },
+  en: {
+    lead: 'Vector is a free, interactive 3D muscle explorer that helps you understand where your muscles are before you train, and connects that to weight training. Freely rotate and move the human body model, click any muscle, and the panel on the right lists the best exercises to train it, each with equipment, target and synergist muscles, step by step instructions and a demo GIF.',
+    use: 'Besides clicking the model, you can browse from the muscle list, save exercises and muscles, and switch between seven languages. No signup, no install.',
+  },
+  es: {
+    lead: 'Vector es un explorador muscular 3D interactivo y gratuito que te ayuda a entender dónde están tus músculos antes de entrenar y lo conecta con el entrenamiento de fuerza. Gira y mueve libremente el modelo del cuerpo humano, haz clic en cualquier músculo y el panel de la derecha mostrará los mejores ejercicios para entrenarlo, cada uno con el equipo, los músculos principales y sinergistas, instrucciones paso a paso y un GIF de demostración.',
+    use: 'Además de hacer clic en el modelo, puedes explorar desde la lista de músculos, guardar ejercicios y músculos, y cambiar entre siete idiomas. Sin registro, sin instalación.',
+  },
+  fr: {
+    lead: 'Vector est un explorateur musculaire 3D interactif et gratuit qui vous aide à comprendre où se trouvent vos muscles avant de vous entraîner, et le relie à la musculation. Faites pivoter et déplacez librement le modèle du corps humain, cliquez sur n’importe quel muscle, et le panneau de droite affiche les meilleurs exercices pour le travailler, chacun avec le matériel, les muscles ciblés et synergistes, des instructions étape par étape et un GIF de démonstration.',
+    use: 'En plus de cliquer sur le modèle, vous pouvez parcourir la liste des muscles, enregistrer des exercices et des muscles, et passer d’une langue à l’autre parmi sept langues. Sans inscription, sans installation.',
+  },
+  it: {
+    lead: 'Vector è un esploratore muscolare 3D interattivo e gratuito che ti aiuta a capire dove si trovano i tuoi muscoli prima di allenarti e lo collega all’allenamento con i pesi. Ruota e sposta liberamente il modello del corpo umano, clicca su qualsiasi muscolo e il pannello a destra elencherà i migliori esercizi per allenarlo, ciascuno con l’attrezzatura, i muscoli target e sinergici, istruzioni passo passo e una GIF dimostrativa.',
+    use: 'Oltre a cliccare sul modello, puoi sfogliare l’elenco dei muscoli, salvare esercizi e muscoli e passare tra sette lingue. Senza registrazione, senza installazione.',
+  },
+  pl: {
+    lead: 'Vector to darmowy, interaktywny eksplorator mięśni 3D, który pomaga zrozumieć, gdzie znajdują się Twoje mięśnie przed treningiem, i łączy to z treningiem siłowym. Swobodnie obracaj i przesuwaj model ludzkiego ciała, kliknij dowolny mięsień, a panel po prawej stronie wyświetli najlepsze ćwiczenia do jego trenowania, każde ze sprzętem, mięśniami docelowymi i wspomagającymi, instrukcjami krok po kroku oraz demonstracyjnym GIF-em.',
+    use: 'Oprócz klikania modelu możesz przeglądać listę mięśni, zapisywać ćwiczenia i mięśnie oraz przełączać się między siedmioma językami. Bez rejestracji, bez instalacji.',
+  },
+  tr: {
+    lead: 'Vector, antrenmandan önce kaslarınızın nerede olduğunu anlamanıza yardımcı olan ve bunu ağırlık antrenmanıyla ilişkilendiren ücretsiz, etkileşimli bir 3D kas kâşifidir. İnsan vücudu modelini serbestçe döndürüp hareket ettirin, herhangi bir kasa tıklayın; sağdaki panel, onu çalıştırmak için en iyi egzersizleri her biri ekipman, hedef ve yardımcı kaslar, adım adım talimatlar ve bir demo GIF’i ile birlikte listeler.',
+    use: 'Modele tıklamanın yanı sıra kas listesinden göz atabilir, egzersizleri ve kasları kaydedebilir ve yedi dil arasında geçiş yapabilirsiniz. Kayıt yok, kurulum yok.',
+  },
+}
+
+/** 《關於》描述文字(依實際語言,含歐語) */
+export const aboutBody = (lang: Lang) => ABOUT_BODY[lang]
 
 type StrKey = keyof typeof STR
 
