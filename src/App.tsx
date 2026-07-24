@@ -603,8 +603,9 @@ function App() {
         </div>
       </header>
 
-      {/* 3D 場景:全幅鋪在最底層,四塊面板浮在其上才會有真正的毛玻璃 */}
-      <div className="absolute inset-0 z-0">
+      {/* 3D 場景:鋪在最底層。桌機時右邊留出面板寬度(24rem),
+          canvas 只到面板左緣,模型自動置中在可見區、不被右邊面板遮住一半。 */}
+      <div className="absolute inset-0 z-0 md:right-96">
         <div className="h-full w-full">
           {/* logarithmicDepthBuffer + 收緊 near/far:大幅降低薄片肌肉重疊處的 z-fighting(破洞/斑駁) */}
           <Canvas
