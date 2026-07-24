@@ -35,3 +35,6 @@ ARCHITECTURE.local.md
 
 # 授權往來備份(本機保存,不進版控)
 licensing/
+
+# 專案的 Claude 準則(本機,不進版控)
+/CLAUDE.md
