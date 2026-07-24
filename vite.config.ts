@@ -8,4 +8,18 @@ export default defineConfig({
   resolve: {
     dedupe: ['three'],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // 把幾乎不變的大型函式庫拆成獨立 chunk:改程式重新部署時,
+        // 回訪者只需重抓變動的 app chunk,three 這包(永久快取)不必重下載
+        manualChunks(id) {
+          if (id.includes('exercisedb.json')) return 'exercise-data'
+          if (id.includes('node_modules/three')) return 'three'
+          if (id.includes('@react-three')) return 'r3f'
+          return undefined
+        },
+      },
+    },
+  },
 })
