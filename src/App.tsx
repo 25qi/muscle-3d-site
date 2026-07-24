@@ -603,9 +603,10 @@ function App() {
         </div>
       </header>
 
-      {/* 3D 場景:鋪在最底層。桌機時右邊留出面板寬度(24rem),
-          canvas 只到面板左緣,模型自動置中在可見區、不被右邊面板遮住一半。 */}
-      <div className="absolute inset-0 z-0 md:right-96">
+      {/* 3D 場景:鋪在最底層。桌機時右邊留出面板寬度(24rem)、左邊也留一點(8rem),
+          模型自動置中在可見區並略偏右,右邊面板不遮、左邊清單打開時也較不擋到。
+          左邊那條沒 canvas 的區域與背景同為深色,看不出接縫。 */}
+      <div className="absolute inset-0 z-0 md:right-96 md:left-32">
         <div className="h-full w-full">
           {/* logarithmicDepthBuffer + 收緊 near/far:大幅降低薄片肌肉重疊處的 z-fighting(破洞/斑駁) */}
           <Canvas
