@@ -11,7 +11,6 @@ import { FeedbackModal } from './components/FeedbackModal'
 import { MobileMenu } from './components/MobileMenu'
 import { ViewportControls } from './components/ViewportControls'
 import { AboutModal } from './components/AboutModal'
-import { Credits } from './components/Credits'
 import { Splash } from './components/Splash'
 import { muscleName, symmetryKey } from './data/muscleNameZh'
 import { resolveMuscle } from './lib/recommend'
@@ -813,11 +812,10 @@ function App() {
         <button
           type="button"
           onClick={() => setShowAbout(true)}
-          className="mb-1 text-[11px] text-ink-2 underline-offset-2 transition-colors hover:text-ink hover:underline"
+          className="text-[11px] text-ink-2 underline-offset-2 transition-colors hover:text-ink hover:underline"
         >
           {t('about')}
         </button>
-        <Credits />
       </footer>
 
       {/* 手機側邊選單(漢堡):頂部工具列 + 左側肌肉清單 + 關於 */}
