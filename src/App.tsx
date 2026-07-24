@@ -19,10 +19,9 @@ import { LANGS, useLang, useT, useUiLang } from './lib/i18n'
 import { ensureLang } from './lib/langSteps'
 import {
   IconChat,
+  IconInfo,
   IconLanguages,
   IconMenu,
-  IconOpacity,
-  IconReset,
   IconStar,
 } from './components/icons'
 
@@ -532,6 +531,13 @@ function App() {
           >
             <IconChat /> <span className="hidden sm:inline">{t('feedback')}</span>
           </button>
+          <button
+            type="button"
+            onClick={() => setShowAbout(true)}
+            className={`${headerBtn} text-ink-2 hover:text-ink`}
+          >
+            <IconInfo /> <span className="hidden sm:inline">{t('about')}</span>
+          </button>
 
           <div className="relative" ref={langMenuRef}>
             <button
@@ -566,39 +572,7 @@ function App() {
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={() => resetView(true)}
-            className={`${headerBtn} text-ink-2 hover:text-ink`}
-          >
-            <IconReset />
-            <span className="hidden sm:inline">{t('resetView')}</span>
-          </button>
-
-          {/* group:游標進入整個框就一起變亮(文字)與轉綠(拉桿),與其他按鈕行為一致 */}
-          <div
-            className={`${headerBtn} group cursor-default text-ink-2 hover:text-ink`}
-          >
-            <IconOpacity />
-            <span className="hidden whitespace-nowrap sm:inline">
-              {t('opacity')}
-            </span>
-            <input
-              type="range"
-              min={0.15}
-              max={1}
-              step={0.05}
-              value={opacity}
-              onChange={(e) => setOpacity(Number(e.target.value))}
-              aria-label={t('opacity')}
-              className="range-accent w-12 sm:w-16"
-              style={
-                {
-                  '--range-progress': (opacity - 0.15) / 0.85,
-                } as React.CSSProperties
-              }
-            />
-          </div>
+          {/* 正面視角與透明度已移到模型右下角的漂浮操作鈕(桌機/手機一致) */}
         </div>
       </header>
 
@@ -800,23 +774,6 @@ function App() {
 
       {/* 啟動畫面:蓋住整個畫面直到模型載入完成再淡出 */}
       <Splash ready={modelReady} onHidden={startIntro} />
-
-      {/* Footer:作者署名 + 授權標註(CC BY-SA 法律義務,不可省)。
-          手機版空間有限,改收進側邊選單的「關於」,此處僅桌機顯示。 */}
-      <footer
-        className={`relative z-30 hidden border-t border-line bg-surface/70 px-4 py-2 text-center backdrop-blur-xl md:block ${chrome} ${chromeHidden} ${
-          introDone ? 'translate-y-0' : 'translate-y-3'
-        }`}
-        style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
-      >
-        <button
-          type="button"
-          onClick={() => setShowAbout(true)}
-          className="text-[11px] text-ink-2 underline-offset-2 transition-colors hover:text-ink hover:underline"
-        >
-          {t('about')}
-        </button>
-      </footer>
 
       {/* 手機側邊選單(漢堡):頂部工具列 + 左側肌肉清單 + 關於 */}
       <MobileMenu
