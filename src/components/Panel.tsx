@@ -313,8 +313,24 @@ export function Panel({
   if (!meshName) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 p-8 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/15 text-3xl text-accent ring-1 ring-accent/30">
-          ✛
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/15 text-accent ring-1 ring-accent/30">
+          {/* 點選手勢:呼應「旋轉、點選左側的 3D 模型」 */}
+          <svg
+            viewBox="0 0 24 24"
+            className="h-7 w-7"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M14 4.1 12 6" />
+            <path d="m5.1 8-2.9-.8" />
+            <path d="m6 12-1.9 2" />
+            <path d="M7.2 2.2 8 5.1" />
+            <path d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z" />
+          </svg>
         </div>
         <div className="space-y-1.5">
           <h3 className="text-lg font-semibold text-ink">{t('exploreTitle')}</h3>
