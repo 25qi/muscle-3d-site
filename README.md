@@ -1,61 +1,77 @@
-# 3D 互動肌肉圖 (Interactive 3D Muscle Explorer)
+# Vector · 3D Muscle Explorer
 
-一個純前端的網頁:中央是一個可旋轉的 **3D 人體肌肉模型**,點擊任一塊肌肉,右側面板就會列出**最適合訓練那塊肌肉的動作**(含器材、難度、分解步驟)。作品集用途。
+A free, interactive 3D muscle explorer on the web. Rotate a **3D human body**, click any muscle, and the right panel lists the **best exercises to train that muscle**, with equipment, step by step instructions and demo animations. A portfolio project.
+
+Live: https://vector-3d-muscle.pages.dev
 
 <!-- TODO: 補一張截圖 docs/screenshot.png 後,取消下一行註解 -->
 <!-- ![screenshot](docs/screenshot.png) -->
 
-## 技術棧
+## Features
 
-| 項目 | 選擇 |
+- Rotatable, clickable 3D anatomy model (467 individual muscle meshes).
+- Click a muscle or search the muscle list (searchable in English and Chinese) to see recommended exercises.
+- Each exercise has equipment, target and secondary muscles, step by step guides and a demo GIF (full screen lightbox).
+- Filter by equipment, primary only, or favourites. Save favourite exercises and muscles (kept in the browser via localStorage).
+- Adjustable muscle opacity to see through to deeper muscles.
+- 7 languages (English, Traditional Chinese, Spanish, French, Italian, Polish, Turkish); first visit is auto detected.
+- Public feedback board (Giscus / GitHub Discussions).
+- No backend, no accounts, no API keys. Everything runs client side.
+
+## Tech stack
+
+| Area | Choice |
 |---|---|
 | Framework | Vite + React + TypeScript |
 | 3D | React Three Fiber (`@react-three/fiber`) |
-| 3D helpers | `@react-three/drei`(`useGLTF` / `OrbitControls` / `Bounds`) |
-| 樣式 | Tailwind CSS v4 |
-| 部署 | Vercel |
+| 3D helpers | `@react-three/drei` (`useGLTF`, `OrbitControls`) |
+| Post FX | `@react-three/postprocessing` (Bloom on highlight) |
+| Styling | Tailwind CSS v4 |
+| Deploy | Cloudflare Pages (also runs on Vercel) |
 
-## 這個專案怎麼運作
+## How it works
 
-三套命名彼此不一致,靠一層對照橋接:
+Three naming schemes do not line up, so a mapping layer bridges them:
 
 ```
-GLB mesh 名稱 (467, 解剖學)  →  muscleId (12, 訓練導向)  →  free-exercise-db 肌肉字串
-left_latissimus_dorsi           lats                        lats
+GLB mesh name (467, anatomical)  ->  muscleId (12, training oriented)  ->  ExerciseDB target string
+left_latissimus_dorsi                lats                                  lats
 ```
 
-- [`src/data/muscleMap.ts`](src/data/muscleMap.ts) — mesh 名稱子字串 → 12 個訓練肌群 → exercise-db 字串的對照表
-- [`src/data/muscleNameZh.ts`](src/data/muscleNameZh.ts) — 467 個 mesh 的中文肌肉名對照(顯示用)
-- [`src/lib/recommend.ts`](src/lib/recommend.ts) — 點到的 mesh → 肌群 → 排序後的動作清單(主要 > 輔助,compound 優先,難度由淺入深)
-- [`src/components/AnatomyModel.tsx`](src/components/AnatomyModel.tsx) — 載入 GLB、逐塊點選判定(位移 < 5px 才算點選)、選中高亮
+- [`src/data/muscleMap.ts`](src/data/muscleMap.ts): mesh name substring to one of 12 training muscle groups.
+- [`src/data/muscleNameZh.ts`](src/data/muscleNameZh.ts): Chinese name for each of the 467 meshes, plus `symmetryKey()` (left/right count as one muscle).
+- [`src/lib/recommend.ts`](src/lib/recommend.ts): clicked mesh to muscle group.
+- [`src/lib/providers/`](src/lib/providers/): pluggable exercise database layer. Swapping databases is a one file change.
+- [`src/components/AnatomyModel.tsx`](src/components/AnatomyModel.tsx): loads the GLB, per mesh picking (a drag under 5px counts as a click), symmetric highlight.
 
-> 注意:three.js 載入 GLB 時會把名稱空格換成底線(`left latissimus dorsi` → `left_latissimus_dorsi`),比對前需先還原空格。
+> Note: three.js replaces spaces with underscores when it loads the GLB (`left latissimus dorsi` becomes `left_latissimus_dorsi`), so matching normalises spaces first.
 
-## 跑起來
+## Run it
 
 ```bash
 npm install
-npm run dev      # 開發伺服器 http://localhost:5173
-npm run build    # 產出 dist/
-npm run preview  # 預覽 build 結果
+npm run dev      # dev server http://localhost:5173
+npm run build    # output to dist/
+npm run preview  # preview the build
 ```
 
-## 資產前處理
+## Asset preprocessing
 
-3D 模型借用開源專案 [`JohanBellander/BodyExplorer`](https://github.com/JohanBellander/BodyExplorer)(MIT,僅借資產)的 `anatomy.glb`,用 gltf-transform 以 meshopt 壓縮:
+The 3D model is `anatomy.glb`, borrowed from the open source project [`JohanBellander/BodyExplorer`](https://github.com/JohanBellander/BodyExplorer) (MIT, assets only), compressed with gltf-transform (meshopt):
 
 ```bash
 # 關鍵:--join false 保留 467 個獨立 mesh(否則點選會失效);
 # --simplify false 保留原始幾何(避免薄片肌肉破損,且此模型再簡化幾乎不省空間)
 npx @gltf-transform/cli optimize <src>.glb public/anatomy.glb --compress meshopt --join false --simplify false
-# 25.13 MB → 6.88 MB
+# 25.13 MB -> 6.88 MB
 ```
 
-動作資料庫用 [`hasaneyldrm/exercises-dataset`](https://github.com/hasaneyldrm/exercises-dataset)(ExerciseDB,MIT,1324 個動作 + GIF),精簡必要欄位後打包進 `src/data/exercisedb.json`。每個資料庫是 `src/lib/providers/` 下一個獨立 provider,方便替換。
+Exercise data comes from [`hasaneyldrm/exercises-dataset`](https://github.com/hasaneyldrm/exercises-dataset) (ExerciseDB, MIT, 1324 exercises with GIFs). Needed fields are packed into `src/data/exercisedb.json`; the non English/Chinese step translations are split into `public/steps/<lang>.json` and lazy loaded to keep the bundle small.
 
-## 授權
+## Licensing
 
-本專案原始碼可自訂授權(CC BY-SA 只約束模型資產,不傳染到程式碼)。
+The source code is yours to license (CC BY-SA only binds the model assets, it does not spread to the code).
 
 - **Anatomy model**: BodyParts3D © The Database Center for Life Science (CC BY-SA 2.1 JP) / Z-Anatomy (CC BY-SA 4.0)
-- **Exercise data**: ExerciseDB — hasaneyldrm/exercises-dataset (MIT)
+- **Exercise data**: ExerciseDB, hasaneyldrm/exercises-dataset (MIT)
+- **Exercise images/GIFs**: © GymVisual (https://gymvisual.com), used with written permission for this non commercial site at 180×180 with attribution.

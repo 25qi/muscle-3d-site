@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vector-3d-muscle.pages.dev/sitemap.xml

@@ -810,6 +810,13 @@ function App() {
         }`}
         style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
       >
+        <button
+          type="button"
+          onClick={() => setShowAbout(true)}
+          className="mb-1 text-[11px] text-ink-2 underline-offset-2 transition-colors hover:text-ink hover:underline"
+        >
+          {t('about')}
+        </button>
         <Credits />
       </footer>
 

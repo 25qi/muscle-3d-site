@@ -75,6 +75,15 @@ const STR = {
     zh: '給這個網站的改進建議(公開,使用 GitHub 帳號留言)。',
   },
   about: { en: 'About & credits', zh: '關於與授權' },
+  aboutLead: {
+    en: 'Vector is a free, interactive 3D muscle explorer. Rotate a 3D human body, click any muscle, and instantly see the best exercises to train it, complete with equipment, step by step instructions and demo animations.',
+    zh: 'Vector 是一個免費的互動式 3D 肌肉圖。你可以旋轉 3D 人體、點選任何一塊肌肉,馬上看到最適合訓練它的動作,附器材、分解步驟與示範動圖。',
+  },
+  aboutUse: {
+    en: 'Browse by clicking the model or searching the muscle list, filter exercises by equipment, save favourites, and switch languages. There is no signup; everything runs in your browser.',
+    zh: '你可以直接點模型或用肌肉清單搜尋,依器材篩選動作,收藏喜歡的動作,還能切換語言。免註冊,全部在瀏覽器裡完成。',
+  },
+  aboutSources: { en: 'Sources & credits', zh: '資料來源與授權' },
 } satisfies Record<string, Record<UiLang, string>>
 
 type StrKey = keyof typeof STR

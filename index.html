@@ -5,7 +5,58 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0b0d10" />
-    <title>Vector — 3D Muscle Explorer</title>
+
+    <title>Vector · 3D Muscle Explorer</title>
+
+    <!--
+      SEO / 分享用中繼資料。正式網址請與你選定的主網域一致(目前設為 Cloudflare)。
+      若改用其他網域,更新 canonical 與 og:url 兩處即可。
+    -->
+    <meta
+      name="description"
+      content="Vector is a free interactive 3D muscle explorer. Rotate a 3D human body, click any muscle, and instantly see the best exercises to train it, with equipment, step by step guides and demo animations. No signup, runs in your browser."
+    />
+    <meta
+      name="keywords"
+      content="3D muscle explorer, muscle anatomy, exercises by muscle, interactive anatomy, muscle map, workout guide, gym exercises, 3D human body, 肌肉解剖, 健身動作, 3D 人體"
+    />
+    <meta name="author" content="Veky" />
+    <link rel="canonical" href="https://vector-3d-muscle.pages.dev/" />
+
+    <!-- Open Graph（Facebook / LINE / Discord 等分享預覽） -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Vector" />
+    <meta property="og:title" content="Vector · 3D Muscle Explorer" />
+    <meta
+      property="og:description"
+      content="Rotate a 3D human body, click any muscle, and instantly see the best exercises to train it. Free, no signup."
+    />
+    <meta property="og:url" content="https://vector-3d-muscle.pages.dev/" />
+
+    <!-- Twitter / X 卡片 -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Vector · 3D Muscle Explorer" />
+    <meta
+      name="twitter:description"
+      content="Rotate a 3D human body, click any muscle, and instantly see the best exercises to train it. Free, no signup."
+    />
+
+    <!-- 結構化資料：讓 Google 與 AI 搜尋引擎更容易理解這是什麼 -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Vector · 3D Muscle Explorer",
+        "url": "https://vector-3d-muscle.pages.dev/",
+        "applicationCategory": "HealthApplication",
+        "operatingSystem": "Web browser",
+        "description": "A free interactive 3D muscle explorer. Rotate a 3D human body, click any muscle, and see the best exercises to train it, with equipment, step by step guides and demo animations.",
+        "inLanguage": ["en", "zh-Hant", "es", "fr", "it", "pl", "tr"],
+        "author": { "@type": "Person", "name": "Veky" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+
     <!--
       在 CSS/JS 下載完成前就先塗上深色底,避免瀏覽器預設白底閃一下。
       這段必須內嵌,不能等外部樣式表。
@@ -21,6 +72,23 @@
   </head>
   <body>
     <div id="root"></div>
+
+    <!--
+      給不執行 JavaScript 的爬蟲看的靜態說明(一般使用者永遠看不到)。
+      SPA 的首頁 HTML 幾乎是空的,這段能讓搜尋引擎至少讀到網站在做什麼。
+    -->
+    <noscript>
+      <h1>Vector, a 3D Muscle Explorer</h1>
+      <p>
+        Vector is a free, interactive 3D muscle explorer. Rotate a 3D human
+        body, click any muscle, and instantly see the best exercises to train
+        it, complete with equipment, step by step instructions and demo
+        animations. Browse by clicking the model or searching the muscle list,
+        filter by equipment, save favourites, and switch languages. No signup,
+        everything runs in your browser.
+      </p>
+    </noscript>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
