@@ -69,7 +69,7 @@ Exercise data comes from [`hasaneyldrm/exercises-dataset`](https://github.com/ha
 
 ## Licensing
 
-The source code is yours to license (CC BY-SA only binds the model assets, it does not spread to the code).
+The source code is MIT licensed (see [LICENSE](LICENSE)). CC BY-SA only binds the model assets, it does not spread to the code.
 
 - **Anatomy model**: BodyParts3D © The Database Center for Life Science (CC BY-SA 2.1 JP) / Z-Anatomy (CC BY-SA 4.0)
 - **Exercise data**: ExerciseDB, hasaneyldrm/exercises-dataset (MIT)
