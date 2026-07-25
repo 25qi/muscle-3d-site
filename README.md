@@ -4,8 +4,7 @@ A free, interactive 3D muscle explorer on the web. Rotate a **3D human body**, c
 
 Live: https://vector-3d-muscle.pages.dev
 
-<!-- TODO: 補一張截圖 docs/screenshot.png 後,取消下一行註解 -->
-<!-- ![screenshot](docs/screenshot.png) -->
+![Vector 3D Muscle Explorer screenshot](docs/screenshot.jpg)
 
 ## Features
 
