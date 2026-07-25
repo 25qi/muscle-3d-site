@@ -1,6 +1,6 @@
 # Vector · 3D Muscle Explorer
 
-A free, interactive 3D muscle explorer on the web. Rotate a **3D human body**, click any muscle, and the right panel lists the **best exercises to train that muscle**, with equipment, step by step instructions and demo animations. A portfolio project.
+A free, interactive 3D muscle explorer on the web. Rotate a **3D human body**, click any muscle, and the right panel lists the **best exercises to train that muscle**, with equipment, step by step instructions and demo animations.
 
 Live: https://vector-3d-muscle.pages.dev
 
@@ -14,7 +14,6 @@ Live: https://vector-3d-muscle.pages.dev
 - Filter by equipment, primary only, or favourites. Save favourite exercises and muscles (kept in the browser via localStorage).
 - Adjustable muscle opacity to see through to deeper muscles.
 - 7 languages (English, Traditional Chinese, Spanish, French, Italian, Polish, Turkish); first visit is auto detected.
-- Public feedback board (Giscus / GitHub Discussions).
 - No backend, no accounts, no API keys. Everything runs client side.
 
 ## Tech stack
@@ -59,8 +58,8 @@ npm run preview  # preview the build
 The 3D model is `anatomy.glb`, borrowed from the open source project [`JohanBellander/BodyExplorer`](https://github.com/JohanBellander/BodyExplorer) (MIT, assets only), compressed with gltf-transform (meshopt):
 
 ```bash
-# 關鍵:--join false 保留 467 個獨立 mesh(否則點選會失效);
-# --simplify false 保留原始幾何(避免薄片肌肉破損,且此模型再簡化幾乎不省空間)
+# --join false keeps all 467 meshes separate (otherwise per-muscle picking breaks);
+# --simplify false keeps the original geometry (avoids holes in thin muscles).
 npx @gltf-transform/cli optimize <src>.glb public/anatomy.glb --compress meshopt --join false --simplify false
 # 25.13 MB -> 6.88 MB
 ```
