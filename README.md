@@ -14,6 +14,7 @@ Live: https://vector-3d-muscle.pages.dev
 - Filter by equipment, primary only, or favourites. Save favourite exercises and muscles (kept in the browser via localStorage).
 - Adjustable muscle opacity to see through to deeper muscles.
 - 7 languages (English, Traditional Chinese, Spanish, French, Italian, Polish, Turkish); first visit is auto detected.
+- Public feedback board (Giscus, backed by GitHub Discussions).
 - No backend, no accounts, no API keys. Everything runs client side.
 
 ## Tech stack
