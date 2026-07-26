@@ -137,7 +137,11 @@ export function ViewportControls({
     'flex h-10 w-10 flex-none items-center justify-center rounded-full border border-line bg-surface/80 shadow-lg backdrop-blur-md transition-colors active:bg-surface-2'
 
   return (
-    <div className="pointer-events-auto absolute right-3 bottom-3 z-20 flex flex-col items-end gap-2">
+    <div
+      className="pointer-events-auto absolute right-3 z-20 flex flex-col items-end gap-2"
+      /* 底部避開 home indicator(App 殼 viewport-fit=cover 時 safe area 不為 0) */
+      style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+    >
       {/* 透明度:直向拉桿(往上長出)+ 下方切換鈕。按鈕位置不隨拉桿變動 */}
       <div className="flex flex-col items-center gap-2">
         {mounted && (

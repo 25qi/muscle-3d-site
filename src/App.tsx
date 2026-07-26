@@ -473,6 +473,8 @@ function App() {
         className={`relative z-30 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line bg-surface/70 px-3 py-2 backdrop-blur-xl sm:px-4 ${chrome} ${chromeHidden} ${
           introDone ? 'translate-y-0' : '-translate-y-3'
         }`}
+        /* viewport-fit=cover 後內容會鋪到瀏海/狀態列下,頂部讓出 safe area(App 殼與瀏海機都需要) */
+        style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
       >
         {/* 品牌(游標靠近整區 → 綠點呼吸燈) */}
         <div className="group/brand flex cursor-default items-center gap-2">

@@ -57,6 +57,11 @@ export function MobileMenu({
         className={`absolute inset-y-0 left-0 flex w-80 max-w-[85vw] flex-col bg-surface/95 text-ink shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-out ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
+        /* 抽屜滿版高,頂/底讓出瀏海與 home indicator 的 safe area */
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
       >
         {/* 抽屜標題列:品牌 + 小字副標(手機頂部工具列放不下,收在這裡) */}
         <div className="flex items-center gap-2 border-b border-line p-3">

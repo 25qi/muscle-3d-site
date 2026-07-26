@@ -1,0 +1,8 @@
+schemaVersion: 1
+sessionDefaults:
+  projectPath: /Users/qi/qi-code/vector-app/ios/App/App.xcodeproj
+  scheme: App
+  simulatorName: iPhone 17 Pro
+  bundleId: com.veky.vector
+  simulatorId: 9F9CB921-C82B-4276-BA9B-92038D40CAC1
+  simulatorPlatform: iOS Simulator

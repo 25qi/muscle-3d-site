@@ -462,7 +462,11 @@ export function Panel({
               <span className="tabular-nums text-ink-2">{exercises.length}</span>{' '}
               / {all.length} {t('exercisesUnit')}
             </div>
-            <ul className="flex-1 space-y-2 overflow-y-auto px-3 pt-1 pb-4 sm:px-4">
+            <ul
+              className="flex-1 space-y-2 overflow-y-auto px-3 pt-1 sm:px-4"
+              /* 底部留出 home indicator 的 safe area,最後一張卡不被遮 */
+              style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+            >
               {exercises.length === 0 && (
                 <li className="px-1 py-6 text-center text-sm text-ink-3">
                   {t('noMatch')}
