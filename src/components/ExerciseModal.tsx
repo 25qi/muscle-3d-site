@@ -46,7 +46,7 @@ export function ExerciseModal({
                 className="h-[180px] w-[180px] rounded-xl object-contain"
               />
               <span className="text-[10px] text-ink-3">
-                Exercise images/GIFs © GymVisual (https://gymvisual.com)
+                Exercise images/GIFs © GymVisual
               </span>
             </>
           ) : (
