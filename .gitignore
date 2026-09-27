@@ -38,3 +38,6 @@ licensing/
 
 # 專案的 Claude 準則(本機,不進版控)
 /CLAUDE.md
+
+# 作品集匯出(本機,不進版控;interview-notes 為個人面試準備)
+portfolio-export/
