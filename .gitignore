@@ -41,3 +41,6 @@ licensing/
 
 # 作品集匯出(本機,不進版控;interview-notes 為個人面試準備)
 portfolio-export/
+
+# XcodeBuildMCP 本機設定(含本機路徑、bundle id、模擬器 UUID,與網站無關)
+.xcodebuildmcp/
