@@ -74,6 +74,8 @@ const STR = {
     en: 'Suggestions to improve this site. Public, signed in with GitHub.',
     zh: '給這個網站的改進建議(公開,使用 GitHub 帳號留言)。',
   },
+  /* AdSense 要求廣告可被辨識,標示只用「廣告 / Advertisement」這類中性字眼 */
+  ad: { en: 'Advertisement', zh: '廣告' },
   about: { en: 'About & credits', zh: '關於與授權' },
   aboutSources: { en: 'Sources & credits', zh: '資料來源與授權' },
 } satisfies Record<string, Record<UiLang, string>>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { type MuscleDef, groupLabel } from '../data/muscleMap'
 import { muscleNameEn, muscleNameZh } from '../data/muscleNameZh'
 import { muscleTerm } from '../data/muscleTerms'
@@ -7,6 +7,12 @@ import { PROVIDERS, type NormalizedExercise } from '../lib/providers'
 import { useLang, useT, useUiLang } from '../lib/i18n'
 import { ExerciseModal } from './ExerciseModal'
 import { FavoriteStar } from './FavoriteStar'
+import { AD_SLOTS, AdSlot, adsAvailable } from './AdSlot'
+
+/** 每幾張動作卡插一個廣告。放太密會踩「內容必須多於廣告」的政策 */
+const AD_EVERY = 8
+/** 廣告關閉時連 li 都不要產生,免得清單多出空白間距 */
+const adsOn = adsAvailable()
 
 interface PanelProps {
   /** 被點到的 mesh 原始解剖名稱(null = 還沒點) */
@@ -472,15 +478,30 @@ export function Panel({
                   {t('noMatch')}
                 </li>
               )}
-              {exercises.map((ex) => (
-                <ExerciseCard
-                  key={ex.id}
-                  ex={ex}
-                  favorited={isFav(ex.id)}
-                  onToggleFav={() => toggleFav(ex.id)}
-                  onOpen={() => setOpenEx(ex)}
-                />
+              {exercises.map((ex, i) => (
+                <Fragment key={ex.id}>
+                  <ExerciseCard
+                    ex={ex}
+                    favorited={isFav(ex.id)}
+                    onToggleFav={() => toggleFav(ex.id)}
+                    onOpen={() => setOpenEx(ex)}
+                  />
+                  {/* 清單內廣告。key 帶 meshName:只有換肌肉(真的換了內容)才重新載入,
+                      切換篩選標籤不會重跑,避免被當成人為灌曝光 */}
+                  {adsOn &&
+                    (i + 1) % AD_EVERY === 0 &&
+                    i + 1 < exercises.length && (
+                      <li key={`ad-${meshName}-${i}`}>
+                        <AdSlot slot={AD_SLOTS.feed} />
+                      </li>
+                    )}
+                </Fragment>
               ))}
+              {adsOn && exercises.length > 0 && (
+                <li key={`ad-end-${meshName}`}>
+                  <AdSlot slot={AD_SLOTS.panelEnd} />
+                </li>
+              )}
             </ul>
           </div>
         </div>
