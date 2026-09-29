@@ -11,3 +11,15 @@
   Cache-Control: public, max-age=2592000
 /favicon.svg
   Cache-Control: public, max-age=2592000
+
+# 安全標頭(全站)
+# CSP 放行的外部來源:
+#   - script-src 'wasm-unsafe-eval':anatomy.glb 用 meshopt 壓縮,解碼器是 WebAssembly
+#   - static.cloudflareinsights.com / cloudflareinsights.com:Cloudflare Web Analytics 自動注入的 beacon
+#   - raw.githubusercontent.com:動作示範 GIF 與縮圖
+#   - frame-src giscus.app:留言板 iframe
+#   - style-src 'unsafe-inline':index.html 的防白閃內嵌 <style>
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://raw.githubusercontent.com; connect-src 'self' https://cloudflareinsights.com; frame-src https://giscus.app; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
